@@ -15,8 +15,9 @@ public class ImageHandler {
         m_NewImageListener = new HashSet<>();
     }
 
-    public ImageHandler addImage(AlgoImage image){
+    public synchronized ImageHandler addImage(AlgoImage image){
         m_ImageList.add(image);
+        m_NewImageListener.forEach( l -> l.update(image, this));
         return this;
     }
 
@@ -30,5 +31,9 @@ public class ImageHandler {
 
     public static interface NewImageListener{
         public void update(AlgoImage newImage, ImageHandler caller);
+    }
+    
+    public int size(){
+        return m_ImageList.size();
     }
 }

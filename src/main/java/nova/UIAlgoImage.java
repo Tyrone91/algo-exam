@@ -1,5 +1,6 @@
 package nova;
 
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Image;
 
@@ -13,6 +14,20 @@ public class UIAlgoImage extends JComponent{
     public UIAlgoImage(AlgoImage src){
         m_SrcImg = src;
         m_Image = createImage(src.getImageSource());
+        setPreferredSize(new Dimension(src.getWidth(), src.getHeight()));
+    }
+    
+    public UIAlgoImage(){
+        m_Image = createImage(200, 200);
+    }
+    
+    public void setSource(AlgoImage src){
+        m_SrcImg = src;
+        m_Image = createImage(src.getImageSource());
+    }
+    
+    public AlgoImage getSource(){
+        return m_SrcImg;
     }
 
     @Override
