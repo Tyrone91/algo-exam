@@ -1,9 +1,13 @@
 package nova;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import javax.swing.SwingUtilities;
 
@@ -18,7 +22,22 @@ public class Controller {
         m_MainFrame = new MainFrame(this);
         m_ImageHandler = new ImageHandler();
     }
+    
+    private void loadImagesFromFiles(Collection<File> files){
+        System.out.println("loadImagesFromFiles: " + files.size());
+        files.parallelStream()
+        .map(m_MainFrame::loadImage)
+        .forEach(m_ImageHandler::addImage);;
+    }
 
+    private void loadImageFromDirectory(Collection<File> dirs){
+        Collection<File> images = dirs.parallelStream()
+        .filter(f -> f.listFiles(Utils.IMAGE_FILTER) != null)
+        .flatMap( f -> Arrays.stream( f.listFiles(Utils.IMAGE_FILTER)))
+        .collect(Collectors.toCollection(ArrayList::new));
+        loadImagesFromFiles(images);
+        
+    }
     public void startUp(){
         m_StartUpListener.forEach( l -> l.onStartUp(this));
         m_StartUpListener.clear();
@@ -45,14 +64,21 @@ public class Controller {
     }
     
     public void loadImagesCommand(){
-        final File dir = new File("testimages/");
-        
-        
-        Arrays.stream(dir.listFiles())
-        .parallel()
-        .filter(File::isFile)
-        .map(m_MainFrame::loadImage)
-        .forEach(m_ImageHandler::addImage);
+        m_MainFrame.openImageFileChooser();
+    }
+
+    public void loadImages(Collection<File> files){
+        System.out.println("loading files: " + files.size() );
+        loadImageFromDirectory( 
+            files.stream()
+            .filter(File::isDirectory)
+            .collect(Collectors.toList())
+        );
+        loadImagesFromFiles(
+            files.stream()
+            .filter(File::isFile)
+            .collect(Collectors.toList())
+        );
     }
 
     public static interface StartUpListener{

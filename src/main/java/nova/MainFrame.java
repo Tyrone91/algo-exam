@@ -5,13 +5,17 @@ import java.awt.Image;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JScrollPane;
+import javax.swing.filechooser.FileFilter;
 
 public class MainFrame extends JFrame implements Controller.StartUpListener {
 
@@ -85,6 +89,33 @@ public class MainFrame extends JFrame implements Controller.StartUpListener {
             m_Controller.error(e);
         }
         return null;
+    }
+
+    public void openImageFileChooser(){
+        JFileChooser jfc = new JFileChooser();
+        jfc.setDialogType(JFileChooser.OPEN_DIALOG);
+        jfc.setMultiSelectionEnabled(true);
+        jfc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+        jfc.setFileFilter( new FileFilter(){
+        
+            @Override
+            public String getDescription() {
+                return Utils.ALLOWED_FILES.stream().collect(Collectors.joining(","))+ ", directory";
+            }
+        
+            @Override
+            public boolean accept(File file) {
+                return Utils.IMAGE_AND_DIRECTORY_FILTER.accept(file);
+            }
+        });
+        jfc.showOpenDialog(this);
+        System.out.println(jfc.getSelectedFiles().length);
+        
+        File[] files = jfc.getSelectedFiles();
+        if(files == null){
+            return;
+        }
+        m_Controller.loadImages(Arrays.asList(files));
     }
     
     public void setCenterImage(AlgoImage image){
