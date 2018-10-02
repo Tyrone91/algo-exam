@@ -54,6 +54,7 @@ public class MainFrame extends JFrame implements Controller.StartUpListener {
         final JMenu menu = new JMenu("File");
         menu.add( UtilsUI.createItem("Load", () -> {
             controller.loadImagesCommand();
+            validate();
         }));
         menu.add( UtilsUI.createItem("Exit", () -> {
             
