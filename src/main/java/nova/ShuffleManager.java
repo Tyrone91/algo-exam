@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public class ShuffleManager {
 
@@ -12,16 +13,18 @@ public class ShuffleManager {
     private Consumer<AlgoImage> m_Consumer;
     private Supplier<AlgoImage> m_Supplier;
     private Runnable m_Callback;
+    private Controller m_Controller;
 
-    public ShuffleManager(){
+    public ShuffleManager(Controller controller){
         m_Running = false;
         m_Images = new HashSet<>();
         m_Consumer = img -> {};
         m_Callback = () -> {};
+        m_Controller = controller;
     }
 
     private void shuffle(){
-
+        
         final int w = m_Images.stream().mapToInt(AlgoImage::getWidth).min().orElse(500);
         final int h = m_Images.stream().mapToInt(AlgoImage::getHeight).min().orElse(300);
 
@@ -31,7 +34,10 @@ public class ShuffleManager {
         
         AlgoImage image = m_Supplier.get();
         m_Consumer.accept(image);
-        AlgoImage[] array = m_Images.toArray(new AlgoImage[0]);
+
+        AlgoImage[] array = m_Images.stream()
+            .map(img -> m_Controller.scaleImage(img, w, h) )
+            .collect(Collectors.toList()).toArray(new AlgoImage[0]);
 
         int cnt = 2 % array.length;
         AlgoImage img1 = array[0];
@@ -73,7 +79,7 @@ public class ShuffleManager {
         m_Callback = callback;
     }
 
-    public boolean toogleImage(AlgoImage image){
+    public boolean toggleImage(AlgoImage image){
        if(m_Images.contains(image)){
            m_Images.remove(image);
            return false;

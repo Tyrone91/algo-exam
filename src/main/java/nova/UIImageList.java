@@ -19,12 +19,14 @@ import java.util.stream.Collectors;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JLayer;
 import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
 import javax.swing.border.BevelBorder;
 
 public class UIImageList extends JComponent implements Controller.StartUpListener{
@@ -132,6 +134,19 @@ public class UIImageList extends JComponent implements Controller.StartUpListene
             final JPanel panel = new JPanel(new BorderLayout());
             panel.add(positionControls(), BorderLayout.EAST );
             panel.setBackground(new Color(0, 0, 0, 0));
+            
+            JCheckBox checkBox = new JCheckBox();
+            checkBox.addChangeListener( event -> {
+                m_Controller.getShuffleManager().toggleImage(m_Background.getSource());
+            });
+            checkBox.setBackground( new Color(0,0,0,0));
+            
+            
+            final JPanel p = new JPanel();
+            p.setBackground( new Color(0,0,0,0));
+            p.add(checkBox);
+            panel.add(p, BorderLayout.WEST);
+            
             return panel;
         }
 
@@ -148,8 +163,15 @@ public class UIImageList extends JComponent implements Controller.StartUpListene
                 m_Handler.moveImageDown(m_Background.getSource());
                 updateImageList();
             });
+
+            final JButton bttnRemove = UtilsUI.createBttn("X", () -> {
+                m_Handler.removeImage(m_Background.getSource());
+                updateImageList();
+            });
+            
             panel.add(bttnUp);
-            panel.add(bttnDown);            
+            panel.add(bttnDown);   
+            panel.add(bttnRemove);         
             return panel;
         }
 

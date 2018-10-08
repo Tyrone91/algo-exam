@@ -36,6 +36,10 @@ public class ImageHandler {
         return m_ImageList;
     }
 
+    public void removeImage(AlgoImage image){
+        m_ImageList.remove(image);
+    }
+
     public void moveImageUp(AlgoImage image){
         final int index = m_ImageList.indexOf(image);
         if(index == 0){

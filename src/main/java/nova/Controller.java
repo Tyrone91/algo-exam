@@ -23,7 +23,7 @@ public class Controller {
         m_StartUpListener = new HashSet<>();
         m_MainFrame = new MainFrame(this);
         m_ImageHandler = new ImageHandler();
-        m_ShuffleManager = new ShuffleManager();
+        m_ShuffleManager = new ShuffleManager(this);
     }
     
     private void loadImagesFromFiles(Collection<File> files){
@@ -108,12 +108,6 @@ public class Controller {
         if(m_ShuffleManager.isRunning() ){
             m_ShuffleManager.endShuffle();
         }else{
-            m_ShuffleManager.clear();
-            //TODO: collect selected
-            m_ImageHandler.getImages()
-            .stream().map( img -> this.scaleImage(img, 500, 300))
-            .forEach(m_ShuffleManager::toogleImage);
-            
             m_ShuffleManager.setConsumer( img -> {
                 SwingUtilities.invokeLater( () -> m_MainFrame.setCenterImage(img) );
             });
