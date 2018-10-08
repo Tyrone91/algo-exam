@@ -12,7 +12,11 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.stream.Collectors;
 
+import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -20,6 +24,8 @@ import javax.swing.JLabel;
 import javax.swing.JLayer;
 import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.border.BevelBorder;
 
 public class UIImageList extends JComponent implements Controller.StartUpListener{
     
@@ -27,15 +33,28 @@ public class UIImageList extends JComponent implements Controller.StartUpListene
     private static final int PREVIEW_HEIGHT = 200;
     private ImageHandler m_Handler;
     private Controller m_Controller;
+    private ListView m_ListView;
 
     public UIImageList(Controller controller, ImageHandler source){
         m_Controller = controller;
         m_Handler = source;
+        m_ListView = new ListView(200, Collections.emptyList());
         
-        setPreferredSize( new Dimension( PREVIEW_WIDTH , PREVIEW_HEIGHT));
         controller.addStartUpListener(this);
-        setLayout( new BoxLayout(this,BoxLayout.Y_AXIS));
-        
+
+        /*
+        m_ListView.setBorder(
+            BorderFactory.createTitledBorder(
+                BorderFactory.createLineBorder(Color.GRAY,2),
+                "Images"
+            )
+        );
+        */
+        m_ListView.setPreferredSize(new Dimension(PREVIEW_WIDTH + 20, getHeight() ));
+
+        setLayout( new BorderLayout());
+        add(m_ListView, BorderLayout.CENTER);
+
         updateImageList();
         source.addNewImageListener( (img, handler ) -> {
             updateImageList();
@@ -54,43 +73,23 @@ public class UIImageList extends JComponent implements Controller.StartUpListene
     @Override
     public void onStartUp(Controller controller) {
         setSize( new Dimension( PREVIEW_WIDTH , getParent().getHeight()));
-        setPreferredSize( new Dimension( PREVIEW_WIDTH , getParent().getHeight()));
+        setPreferredSize( new Dimension( PREVIEW_WIDTH + 25, getParent().getHeight()));
         getParent().validate();
     }
     
 
     public void updateImageList(){
-        final Dimension previewSize = new Dimension(PREVIEW_WIDTH, PREVIEW_HEIGHT);
-        removeAll();
-        final GridBagConstraints c = new GridBagConstraints();
-        c.gridx = 0;
-        c.gridy = 0;
-        c.gridwidth = 1;
-        c.gridheight = 1;
-        c.anchor = GridBagConstraints.NORTH;
-        c.fill = GridBagConstraints.HORIZONTAL;
-        //c.insets.bottom = 5;
-        //c.insets.left = 5;
-        //c.insets.right = 5;
-        c.weightx = 1;
-        c.weighty = 0;
-        m_Handler.getImages().stream()
+        Collection<SelectableImage> images = m_Handler.getImages().stream()
             .map(UIAlgoImage::new)
             .map(SelectableImage::new)
-            .forEach( img -> {
-                //img.setSize(previewSize);
-                img.setPreferredSize(previewSize);
-                applyMouseListener(img.m_Background);
-                add(img);
-                c.gridy++;
-                System.out.println("adding img at: " + c.gridy);
-            });
-        c.fill = GridBagConstraints.BOTH;   
-        c.weighty = 1;
-        System.out.println("adding placeholder");
-        //add( new  JLabel("t"), c);
-        //setSize( new Dimension( PREVIEW_WIDTH + 200, m_Handler.size() * PREVIEW_HEIGHT));
-        setPreferredSize( new Dimension( PREVIEW_WIDTH + 50, m_Handler.size() * PREVIEW_HEIGHT));
+            .collect(Collectors.toList());
+
+        images.stream()
+            .map(SelectableImage::getImageBackground)
+            .forEach(this::applyMouseListener);
+
+        m_ListView.updateList(images);
+        
         validate();
         repaint();
     }
@@ -107,6 +106,7 @@ public class UIImageList extends JComponent implements Controller.StartUpListene
 
             m_Background = bg;
 
+            setPreferredSize(INITIAL_SIZE);
             setSize(INITIAL_SIZE);
             bg.setSize(INITIAL_SIZE);
             pane.setSize(INITIAL_SIZE);
@@ -114,9 +114,7 @@ public class UIImageList extends JComponent implements Controller.StartUpListene
             
             pane.add(controlPane, 100);
             pane.add(bg, JLayeredPane.DEFAULT_LAYER);
-            pane.setBackground(Color.red);
-
-            System.out.println("Constructor call");
+            
             setBackground(Color.yellow);
             add(pane, BorderLayout.CENTER);
             validate();
@@ -134,7 +132,6 @@ public class UIImageList extends JComponent implements Controller.StartUpListene
             final JPanel panel = new JPanel(new BorderLayout());
             panel.add(positionControls(), BorderLayout.EAST );
             panel.setBackground(new Color(0, 0, 0, 0));
-            //panel.setOpaque(false);
             return panel;
         }
 
@@ -156,11 +153,8 @@ public class UIImageList extends JComponent implements Controller.StartUpListene
             return panel;
         }
 
-        @Override
-        protected void paintComponent(Graphics g) {
-            super.paintComponent(g);
-            g.setColor(Color.CYAN);
-            g.drawRect(0, 0, getWidth(), getHeight());
+        public UIAlgoImage getImageBackground(){
+            return m_Background;
         }
     }
 }

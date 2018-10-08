@@ -2,6 +2,8 @@ package nova;
 
 import java.awt.BorderLayout;
 import java.awt.Image;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -28,6 +30,12 @@ public class MainFrame extends JFrame implements Controller.StartUpListener {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(720, 480);
         controller.addStartUpListener(this);
+        addWindowListener( new WindowAdapter() {
+            @Override
+            public void windowClosed(WindowEvent arg0) {
+                m_Controller.closeApp();
+            }
+        });
     }
 
     @Override
@@ -57,7 +65,7 @@ public class MainFrame extends JFrame implements Controller.StartUpListener {
             validate();
         }));
         menu.add( UtilsUI.createItem("Exit", () -> {
-            
+            m_Controller.closeApp();
         }));
         return menu;
     }
@@ -65,15 +73,14 @@ public class MainFrame extends JFrame implements Controller.StartUpListener {
     private JMenu initActionMenu(Controller controller){
         final JMenu menu = new JMenu("Actions");
 
-        final List<String> todoControllerStuff = new ArrayList<>();
         menu.add( UtilsUI.createItem("Start shuffle", (item) -> {
-            if(todoControllerStuff.size() == 1){
+
+            if(m_Controller.getShuffleManager().isRunning()){
                 item.setText("Start shuffle");
-                todoControllerStuff.clear();
-            }else {
+            }else{
                 item.setText("End shuffle");
-                todoControllerStuff.add("fuck java");
             }
+            m_Controller.toggleShuffle();
         }));
 
         menu.add( UtilsUI.createItem("Add all", () -> {

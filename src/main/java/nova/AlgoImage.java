@@ -98,4 +98,17 @@ public class AlgoImage {
     public MemoryImageSource getImageSource(){
         return m_ImageSource;
     }
+
+    public int[] raw(){
+        return m_ImagePix;
+    }
+
+    public AlgoImage set(int i, int value){
+        m_ImagePix[i] = value;
+        return this;
+    }
+
+    public int get(int i){
+        return m_ImagePix[i];
+    }
 }
