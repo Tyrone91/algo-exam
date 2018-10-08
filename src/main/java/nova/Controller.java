@@ -7,7 +7,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import javax.swing.SwingUtilities;
@@ -42,9 +41,12 @@ public class Controller {
         
     }
     public void startUp(){
-        m_StartUpListener.forEach( l -> l.onStartUp(this));
+        Collection<StartUpListener> listeners = new ArrayList<>(m_StartUpListener);
         m_StartUpListener.clear();
         m_StartUpListener = null;
+        listeners.forEach( l -> l.onStartUp(this));
+        listeners.clear();
+
         SwingUtilities.invokeLater( () -> {
             m_MainFrame.setVisible(true);
         });
@@ -61,7 +63,8 @@ public class Controller {
     public void addStartUpListener(StartUpListener listener){
         if(m_StartUpListener == null){
             System.err.println("No more listeners allowed");
-            return;
+            throw new RuntimeException("this time as error");
+            //return;
         }
         m_StartUpListener.add(listener);
     }

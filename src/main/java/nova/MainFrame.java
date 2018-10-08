@@ -6,9 +6,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
@@ -16,6 +14,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JScrollPane;
 import javax.swing.filechooser.FileFilter;
 
@@ -72,17 +71,21 @@ public class MainFrame extends JFrame implements Controller.StartUpListener {
 
     private JMenu initActionMenu(Controller controller){
         final JMenu menu = new JMenu("Actions");
-
-        menu.add( UtilsUI.createItem("Start shuffle", (item) -> {
-
-            if(m_Controller.getShuffleManager().isRunning()){
-                item.setText("Start shuffle");
-            }else{
-                item.setText("End shuffle");
-            }
+        
+        final JMenuItem shuffleToggle = UtilsUI.createItem("Start shuffle", (item) -> {
             m_Controller.toggleShuffle();
-        }));
-
+            if(m_Controller.getShuffleManager().isRunning()){
+                item.setText("End shuffle");
+            }else{
+                item.setText("Start shuffle");
+            }
+        });
+        shuffleToggle.setEnabled(false);
+        menu.add(shuffleToggle);
+        controller.getShuffleManager().addToggleListener( (img, added) -> {
+            shuffleToggle.setEnabled(controller.getShuffleManager().isReady());
+        });
+        
         menu.add( UtilsUI.createItem("Add all", () -> {
             
         }));
@@ -101,6 +104,7 @@ public class MainFrame extends JFrame implements Controller.StartUpListener {
 
     public void openImageFileChooser(){
         JFileChooser jfc = new JFileChooser();
+        jfc.setCurrentDirectory( new File (System.getProperty("user.dir")));
         jfc.setDialogType(JFileChooser.OPEN_DIALOG);
         jfc.setMultiSelectionEnabled(true);
         jfc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);

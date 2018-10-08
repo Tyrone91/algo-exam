@@ -3,11 +3,6 @@ package nova;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Graphics;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.GridLayout;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
@@ -16,18 +11,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.stream.Collectors;
 
-import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
-import javax.swing.JLabel;
-import javax.swing.JLayer;
 import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JSpinner;
-import javax.swing.border.BevelBorder;
 
 public class UIImageList extends JComponent implements Controller.StartUpListener{
     
@@ -42,8 +31,6 @@ public class UIImageList extends JComponent implements Controller.StartUpListene
         m_Handler = source;
         m_ListView = new ListView(200, Collections.emptyList());
         
-        controller.addStartUpListener(this);
-
         /*
         m_ListView.setBorder(
             BorderFactory.createTitledBorder(
@@ -114,8 +101,29 @@ public class UIImageList extends JComponent implements Controller.StartUpListene
             pane.setSize(INITIAL_SIZE);
             controlPane.setSize(INITIAL_SIZE);
             
-            pane.add(controlPane, 100);
-            pane.add(bg, JLayeredPane.DEFAULT_LAYER);
+            
+            JPanel p = new JPanel( new BorderLayout());
+            p.setPreferredSize( INITIAL_SIZE);
+            p.setSize(INITIAL_SIZE);
+            p.setOpaque(false);
+            
+            JPanel p2 = new JPanel();
+            p2.setOpaque(false);
+            
+            JCheckBox box = new JCheckBox();
+            box.setOpaque(false);
+            box.addActionListener( event -> {
+                boolean result = m_Controller.getShuffleManager().toggleImage(m_Background.getSource());
+                box.setSelected(result);
+            });
+            box.setSelected(m_Controller.getShuffleManager().has(m_Background.getSource()));
+            
+            p2.add(box);
+            p.add(p2, BorderLayout.WEST);
+            
+            pane.add( p, 0);
+            pane.add(controlPane, 1);
+            pane.add(bg, 2);
             
             setBackground(Color.yellow);
             add(pane, BorderLayout.CENTER);
@@ -135,16 +143,9 @@ public class UIImageList extends JComponent implements Controller.StartUpListene
             panel.add(positionControls(), BorderLayout.EAST );
             panel.setBackground(new Color(0, 0, 0, 0));
             
-            JCheckBox checkBox = new JCheckBox();
-            checkBox.addChangeListener( event -> {
-                m_Controller.getShuffleManager().toggleImage(m_Background.getSource());
-            });
-            checkBox.setBackground( new Color(0,0,0,0));
-            
-            
             final JPanel p = new JPanel();
             p.setBackground( new Color(0,0,0,0));
-            p.add(checkBox);
+            //p.add(checkBox);
             panel.add(p, BorderLayout.WEST);
             
             return panel;
