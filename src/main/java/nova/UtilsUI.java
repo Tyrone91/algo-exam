@@ -1,5 +1,6 @@
 package nova;
 
+import java.awt.Font;
 import java.util.function.Consumer;
 
 import javax.swing.JButton;
@@ -28,5 +29,19 @@ public final class UtilsUI {
         final JButton bttn = new JButton(text);
         bttn.addActionListener( action -> callback.accept(bttn));
         return bttn;
+    }
+
+    public static Font smallFont(){
+        return new Font(
+            Font.MONOSPACED,
+            Font.PLAIN,
+            10);
+    }
+
+    public static Font mediumFont(){
+        return new Font(
+            Font.MONOSPACED,
+            Font.PLAIN,
+            12);
     }
 }

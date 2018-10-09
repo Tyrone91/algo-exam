@@ -165,7 +165,7 @@ public class UIImageList extends JComponent implements Controller.StartUpListene
                 updateImageList();
             });
 
-            final JButton bttnRemove = UtilsUI.createBttn("X", () -> {
+            final JButton bttnRemove = UtilsUI.createBttn("✗", () -> {
                 m_Handler.removeImage(m_Background.getSource());
                 updateImageList();
             });

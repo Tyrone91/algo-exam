@@ -7,7 +7,7 @@ public final class ColorUtils {
     private static final int RED_MASK = 0x00FF0000;
 
     private static int gradientSingleColor(int color1, int color2, int percent){
-        return color1 + (color2 - color1) * percent/100; //TODO: check java conversion error.
+        return color1 + (color2 - color1) * percent/100;
     }
 
     public static int getBlue(int color){

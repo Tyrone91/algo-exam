@@ -23,9 +23,24 @@ public class MainFrame extends JFrame implements Controller.StartUpListener {
     private Controller m_Controller;
     private UIImageList m_ImageList;
     private UIAlgoImage m_CenterImage;
+    private QuickNavigationBar m_NavBar;
 
     public MainFrame(Controller controller){
         super("ALGO: Assignment 1.0");
+
+        m_NavBar = new QuickNavigationBar();
+
+        m_NavBar
+            .addNavEntry("Draw", "─", () -> {})
+            .addNavEntry("Draw", "●", () -> {})
+
+            .addNavEntry("Morph", "🗘", () -> {})
+            .addNavEntry("Morph", "🡘 🡙", () -> {})
+            .addNavEntry("Morph", "✂", () -> {})
+            .addNavEntry("Morph", "⇱", () -> {})
+
+            .update();
+
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(720, 480);
         controller.addStartUpListener(this);
@@ -48,6 +63,7 @@ public class MainFrame extends JFrame implements Controller.StartUpListener {
         final JScrollPane listPane = new JScrollPane(m_ImageList);
         add(listPane, BorderLayout.EAST);
         add(m_CenterImage, BorderLayout.CENTER);
+        add(m_NavBar,BorderLayout.NORTH);
     }
 
     private JMenuBar initMenuBar(Controller controller){
