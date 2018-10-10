@@ -68,23 +68,14 @@ public class AlgoImage {
         m_ImagePix[i] = value;
     }
 
-    public void setTmpPx(int x, int y, int value){
-        if(m_TmpImageBuffer == null){
-            m_TmpImageBuffer = Arrays.copyOf(m_ImagePix, m_ImagePix.length);
-        }
-        final int i  = toIndex(x, y);
-        m_TmpImageBuffer[i] = value;
+    public void createBuffer(){  
+        m_TmpImageBuffer = Arrays.copyOf(m_ImagePix, m_ImagePix.length);
     }
 
-    public void resetBuffer(){
+    public void resetToBuffer(){
         for(int i = 0; i < m_ImagePix.length; ++i){
-            m_TmpImageBuffer[i] = m_ImagePix[i];
+            m_ImagePix[i] = m_TmpImageBuffer[i];
         }
-    }
-
-    public void writeBuffer(){
-        m_ImagePix = m_TmpImageBuffer;
-        m_TmpImageBuffer = null;
     }
 
     public void clearBuffer(){

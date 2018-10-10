@@ -1,7 +1,13 @@
 package nova;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Image;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
@@ -10,8 +16,10 @@ import java.util.Arrays;
 import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
+import javax.swing.JColorChooser;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -27,12 +35,11 @@ public class MainFrame extends JFrame implements Controller.StartUpListener {
 
     public MainFrame(Controller controller){
         super("ALGO: Assignment 1.0");
+        setLayout( new BorderLayout());
 
         m_NavBar = new QuickNavigationBar();
 
         m_NavBar
-            .addNavEntry("Draw", "─", () -> {})
-            .addNavEntry("Draw", "●", () -> {})
 
             .addNavEntry("Morph", "🗘", () -> {})
             .addNavEntry("Morph", "🡘 🡙", () -> {})
@@ -50,6 +57,16 @@ public class MainFrame extends JFrame implements Controller.StartUpListener {
                 m_Controller.closeApp();
             }
         });
+        
+        JLabel stuff = new JLabel(); //TODO: rename
+        add(stuff, BorderLayout.SOUTH);
+        addComponentListener( new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                if(m_CenterImage != null)
+                    stuff.setText( "x:" + m_CenterImage.getXScaleOfImage() );
+            }
+        });
     }
 
     @Override
@@ -59,11 +76,75 @@ public class MainFrame extends JFrame implements Controller.StartUpListener {
         m_ImageList = new UIImageList( controller, controller.getImageHandler());
         setJMenuBar(initMenuBar(controller));
         
-        setLayout( new BorderLayout());
+        
         final JScrollPane listPane = new JScrollPane(m_ImageList);
         add(listPane, BorderLayout.EAST);
         add(m_CenterImage, BorderLayout.CENTER);
         add(m_NavBar,BorderLayout.NORTH);
+        
+        m_CenterImage.addMouseListener(new MouseAdapter() {
+            
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                if(m_CenterImage.getSource() != null)
+                    controller.getCurrentTool().onReleased(fixXOffset(e.getX()), fixYOffset(e.getY()));
+            }
+            
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if(m_CenterImage.getSource() != null)
+                    controller.getCurrentTool().onPressed(fixXOffset(e.getX()), fixYOffset(e.getY()));
+            }
+            
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                //controller.getCurrentTool().onMove(e.getX(), e.getY());
+                
+            }
+        });
+        
+        
+        m_CenterImage.addMouseMotionListener( new MouseMotionListener() {
+            
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                //controller.getCurrentTool().onMove(e.getX(), e.getY());
+                
+            }
+            
+            @Override
+            public void mouseDragged(MouseEvent e) {
+                if(m_CenterImage.getSource() != null)
+                    controller.getCurrentTool().onMove(fixXOffset(e.getX()), fixYOffset(e.getY()));
+                
+            }
+        });
+        
+        JMenu toolMenu = new JMenu("Tools");
+        for(ImageTool tool : controller.getTools()){
+            tool.initNavigationBarContext(m_NavBar);
+            toolMenu.add( UtilsUI.createItem(tool.getRepresentation() + " | " + tool.getName(), () -> controller.activateTool(tool)));
+            tool.getToolOptions().forEach( opt -> {
+                toolMenu.add(UtilsUI.createItem(opt.getName(), () -> {
+                    if(controller.getCurrentTool() != tool){
+                        controller.activateTool(tool);
+                    }
+                    opt.getAction().accept(controller);
+                }));
+            });
+            
+            //item.setText(tool.getName());
+            toolMenu.addSeparator();
+        }
+        getJMenuBar().add(toolMenu);
+    }
+    
+    private int fixXOffset(int x){
+        return (int)(m_CenterImage.getXScaleOfImage() * x);
+    }
+    
+    private int fixYOffset(int y){
+        return (int)(m_CenterImage.getYScaleOfImage() * y);
     }
 
     private JMenuBar initMenuBar(Controller controller){
@@ -150,6 +231,11 @@ public class MainFrame extends JFrame implements Controller.StartUpListener {
        m_CenterImage.setSource(image);
        validate();
        m_CenterImage.repaint();
+    }
+    
+    
+    public Color openColorChooser(){
+        return JColorChooser.showDialog(this, "Please select a color", Color.BLACK);
     }
         
         

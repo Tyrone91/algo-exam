@@ -39,6 +39,20 @@ public class UIAlgoImage extends JComponent{
 
         g.drawImage(m_Image, 0, 0, w, h, this);
     }
+    
+    public float getXScaleOfImage(){
+        if(m_Image == null){
+            return 0;
+        }
+        return (float)m_Image.getWidth(this) / (float)getWidth();
+    }
+    
+    public float getYScaleOfImage(){
+        if(m_Image == null){
+            return 0;
+        }
+        return (float)m_Image.getHeight(this) / (float)getHeight();
+    }
 
     
 }

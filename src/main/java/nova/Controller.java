@@ -1,11 +1,13 @@
 package nova;
 
+import java.awt.Color;
 import java.awt.Image;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -17,12 +19,16 @@ public class Controller {
     private ImageHandler m_ImageHandler;
     private Set<StartUpListener> m_StartUpListener;
     private ShuffleManager m_ShuffleManager;
+    private ImageTool m_CurrentTool;
+    private AlgoImage m_CurrentImage;
+    private List<ImageTool> m_Tools = Arrays.asList(new DrawTool());
 
     public Controller(){
         m_StartUpListener = new HashSet<>();
         m_MainFrame = new MainFrame(this);
         m_ImageHandler = new ImageHandler();
         m_ShuffleManager = new ShuffleManager(this);
+        m_CurrentTool = m_Tools.get(0);
     }
     
     private void loadImagesFromFiles(Collection<File> files){
@@ -45,6 +51,7 @@ public class Controller {
         m_StartUpListener.clear();
         m_StartUpListener = null;
         listeners.forEach( l -> l.onStartUp(this));
+        m_CurrentTool.onInit(this, null);
         listeners.clear();
 
         SwingUtilities.invokeLater( () -> {
@@ -101,6 +108,8 @@ public class Controller {
     
     public void showImage(AlgoImage image){
         m_MainFrame.setCenterImage(image);
+        m_CurrentImage = image;
+        m_CurrentTool.onImageChange(image);
     }
 
     public ShuffleManager getShuffleManager(){
@@ -131,5 +140,21 @@ public class Controller {
     public AlgoImage scaleImage(AlgoImage src,int width,int height){
         return new AlgoImage(m_MainFrame.createImage(src.getImageSource())
             .getScaledInstance(width, height, Image.SCALE_SMOOTH), width, height);
+    }
+    
+    public void activateTool(ImageTool tool){
+        
+    }
+    
+    public ImageTool getCurrentTool(){
+        return m_CurrentTool;
+    }
+    
+    public List<ImageTool> getTools(){
+        return m_Tools;
+    }
+    
+    public Color openColorChooser(){
+        return m_MainFrame.openColorChooser();
     }
 }

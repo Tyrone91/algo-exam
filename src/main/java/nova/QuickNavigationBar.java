@@ -2,9 +2,7 @@ package nova;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.Font;
 import java.awt.Graphics;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -16,8 +14,6 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.border.Border;
-import javax.swing.border.TitledBorder;
 
 public class QuickNavigationBar extends JComponent {
 
@@ -38,6 +34,16 @@ public class QuickNavigationBar extends JComponent {
         nav.addEntry(rep, command);
         return this;
     }
+    
+    public QuickNavigationBar addNavEntry(String title, JComponent customComp){
+        NavEntry nav = m_Entries.get(title);
+        if(nav == null){
+            nav = new NavEntry(title);
+            m_Entries.put(title, nav);
+        }
+        nav.addEntry(customComp);
+        return this;
+    }
 
     public void update(){
         removeAll();
@@ -55,7 +61,7 @@ public class QuickNavigationBar extends JComponent {
 
     public class NavEntry extends JComponent {
 
-        private Collection<JButton> m_Entries;
+        private Collection<JComponent> m_Entries;
         private String m_Title;
 
         public NavEntry(String title){
@@ -64,11 +70,16 @@ public class QuickNavigationBar extends JComponent {
             m_Entries = new ArrayList<>();
             //setPreferredSize( new Dimension(200, 50));
         }
+        
 
         public void addEntry(String rep, Runnable action){
             JButton bttn = UtilsUI.createBttn(rep,action);
             bttn.setFont(UtilsUI.mediumFont());
             m_Entries.add(bttn);
+        }
+        
+        public void addEntry(JComponent custom){
+            m_Entries.add(custom);
         }
 
         public void update(){
