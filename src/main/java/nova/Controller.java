@@ -25,7 +25,7 @@ public class Controller {
     private ShuffleManager m_ShuffleManager;
     private ImageTool m_CurrentTool;
     private AlgoImage m_CurrentImage;
-    private List<ImageTool> m_Tools = Arrays.asList(new DrawTool());
+    private List<ImageTool> m_Tools = Arrays.asList(new DrawTool(), new MorphTool());
 
     public Controller(){
        
@@ -33,6 +33,10 @@ public class Controller {
         m_ImageHandler = new ImageHandler();
         m_ShuffleManager = new ShuffleManager(this);
         m_CurrentTool = m_Tools.get(0);
+        m_CurrentImage = new AlgoImage(400,400);
+        for(int i = 0; i < m_CurrentImage.raw().length; ++i){
+            m_CurrentImage.set(i, 0xFFFFFFFF);
+        }
     }
     
     private void loadImagesFromFiles(Collection<File> files){
@@ -60,6 +64,7 @@ public class Controller {
 
         SwingUtilities.invokeLater( () -> {
             m_MainFrame.setVisible(true);
+            showImage(m_CurrentImage);
         });
     }
 
@@ -152,7 +157,8 @@ public class Controller {
     }
     
     public void activateTool(ImageTool tool){
-        
+        m_CurrentTool = tool;
+        tool.onInit(this, m_CurrentImage);
     }
     
     public ImageTool getCurrentTool(){

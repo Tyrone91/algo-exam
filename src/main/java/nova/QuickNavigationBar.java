@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -18,13 +19,15 @@ import javax.swing.JPanel;
 public class QuickNavigationBar extends JComponent {
 
     private Map<String, NavEntry> m_Entries;
+    private Controller m_Controller;
 
-    public QuickNavigationBar(){
+    public QuickNavigationBar(Controller controller){
         setLayout( new FlowLayout(FlowLayout.LEFT));
         m_Entries = new HashMap<>();
+        m_Controller = controller;
     }
 
-    public QuickNavigationBar addNavEntry(String title, String rep, Runnable command ){
+    public QuickNavigationBar addNavEntry(String title, String rep, Consumer<Controller> command ){
 
         NavEntry nav = m_Entries.get(title);
         if(nav == null){
@@ -72,8 +75,8 @@ public class QuickNavigationBar extends JComponent {
         }
         
 
-        public void addEntry(String rep, Runnable action){
-            JButton bttn = UtilsUI.createBttn(rep,action);
+        public void addEntry(String rep, Consumer<Controller> action){
+            JButton bttn = UtilsUI.createBttn(rep, () -> action.accept(m_Controller));
             bttn.setFont(UtilsUI.mediumFont());
             m_Entries.add(bttn);
         }

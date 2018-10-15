@@ -10,7 +10,7 @@ public class Vector3 extends Matrix {
     }
 
     public Vector3(){
-        this(0,0,0);
+        this(0,0,1);
     }
 
 
@@ -22,8 +22,18 @@ public class Vector3 extends Matrix {
         return data(0, 1);
     }
 
+    public Vector3 setX(double d){
+        data(0,0, d);
+        return this;
+    }
+
+    public Vector3 setY(double d){
+        data(0,1, d);
+        return this;
+    }
+
     public static Vector3 of(double a, double b){
-        return of(a,b,0);
+        return of(a,b,1);
     }
 
     public static Vector3 of(double a, double b, double c){

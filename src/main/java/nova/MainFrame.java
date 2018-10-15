@@ -45,8 +45,8 @@ public class MainFrame extends JFrame implements Controller.StartUpListener {
         super("ALGO: Assignment 1.0");
         setLayout( new BorderLayout());
         m_SouthBar = new JPanel();
-        m_NavBar = new QuickNavigationBar();
-
+        m_NavBar = new QuickNavigationBar(controller);
+        /*
         m_NavBar
 
             .addNavEntry("Morph", "🗘", () -> {})
@@ -55,6 +55,7 @@ public class MainFrame extends JFrame implements Controller.StartUpListener {
             .addNavEntry("Morph", "⇱", () -> {})
 
             .update();
+        */
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(720, 480);
@@ -177,10 +178,14 @@ public class MainFrame extends JFrame implements Controller.StartUpListener {
     }
     
     private int fixXOffset(int x){
+        int offset = m_CenterImage.getWidth() /2 - m_CenterImage.getSizeByScale().width / 2;
+        x -= offset;
         return (int)(m_CenterImage.getXScaleOfImage() * x);
     }
     
     private int fixYOffset(int y){
+        int offset = m_CenterImage.getHeight() /2 - m_CenterImage.getSizeByScale().height / 2;
+        y -= offset;
         return (int)(m_CenterImage.getYScaleOfImage() * y);
     }
 
@@ -208,6 +213,7 @@ public class MainFrame extends JFrame implements Controller.StartUpListener {
             //item.setText(tool.getName());
             toolMenu.addSeparator();
         }
+        m_NavBar.update();
         return toolMenu;
     }
 

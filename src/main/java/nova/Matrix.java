@@ -127,6 +127,16 @@ public class Matrix {
         return m;
     }
 
+    public static Matrix mult(Matrix a, Matrix... rest){
+        Matrix res = a;
+        for(Matrix b : rest){
+            Matrix m  = new Matrix(b.columns(), a.rows());
+            multHelp(res, b, m);
+            res = m;
+        }
+        return res;
+    }
+
     public static Matrix unit(){
         return UNIT_MATRIX;
     }
@@ -135,5 +145,29 @@ public class Matrix {
         Vector3 res = Vector3.of(0, 0);
         multHelp(a, b, res);
         return res;
+    }
+
+    public static Matrix inverseTranslate(int x, int y){
+        return Matrix.of( 1, 0, -x,
+                          0, 1, -y,
+                          0, 0, 1);
+    }
+
+    public static Matrix inverseRotate(float alpha){
+        return Matrix.of( Math.cos(-alpha), -Math.sin(-alpha), 0,
+                          Math.sin(-alpha), Math.cos(-alpha), 0,
+                          0, 0, 1);
+    }
+
+    public static Matrix inverseScale(float xScale, float yScale){
+        return Matrix.of( 1, 0, 0,
+                          0, 1, 0,
+                          0, 0, 1);
+    }
+
+    public static Matrix inverseXScherung(int x, int y){
+        return Matrix.of( 1, 0, 0,
+                          0, 1, 0,
+                          0, 0, 1);
     }
 }

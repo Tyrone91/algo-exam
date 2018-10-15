@@ -52,7 +52,16 @@ public class AlgoImage {
     }
 
     private int toIndex(int x, int y){
+        if(!inRange(x, y)){
+            throw new IllegalArgumentException(
+                String.format("x=%s or y=%s not in range of %s/%s", x,y, m_Width, m_Height)
+            );
+        }
         return m_Width * y + x;
+    }
+
+    public boolean inRange(int x, int y){
+        return !(x < 0 || y < 0 || x >= m_Width || y >= m_Height);
     }
 
     public int getWidth(){
@@ -66,6 +75,10 @@ public class AlgoImage {
     public void setPx(int x, int y, int value){
         final int i  = toIndex(x, y);
         m_ImagePix[i] = value;
+    }
+
+    public int getBufferData(int x, int y){
+        return m_TmpImageBuffer[toIndex(x, y)];
     }
 
     public void createBuffer(){  

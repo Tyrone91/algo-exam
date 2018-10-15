@@ -46,7 +46,7 @@ public class UIAlgoImage extends JComponent{
             int x = getWidth()/2 - imgW/2;
             int y = getHeight()/2 - imgH/2;
             
-            g.drawImage(m_Image, 0, 0, imgW, imgH, this);
+            g.drawImage(m_Image, x, y, imgW, imgH, this);
         }    
     }
     
