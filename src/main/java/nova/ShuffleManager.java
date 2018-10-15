@@ -1,6 +1,8 @@
 package nova;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -58,7 +60,7 @@ public class ShuffleManager {
                 try {
                     Thread.sleep(20);
                 } catch (Exception e) {
-                    // TODO: handle exception
+                    m_Controller.error(e);
                 }
             }
             img1 = img2;
@@ -84,7 +86,6 @@ public class ShuffleManager {
     }
 
     public boolean toggleImage(AlgoImage image) {
-        System.out.println(m_OnToggleListener.size());
         if (m_Images.contains(image)) {
             m_Images.remove(image);
             m_OnToggleListener.forEach(l -> l.accept(image, false));
@@ -117,7 +118,9 @@ public class ShuffleManager {
     }
 
     public void clear() {
+        final List<AlgoImage> tmp = new ArrayList<>(m_Images);
         m_Images.clear();
+        tmp.forEach( img -> m_OnToggleListener.forEach( l -> l.accept(img, false)));
     }
 
     public ShuffleManager addToggleListener(BiConsumer<AlgoImage, Boolean> listener) {

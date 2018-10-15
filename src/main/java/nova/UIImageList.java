@@ -116,6 +116,11 @@ public class UIImageList extends JComponent implements Controller.StartUpListene
                 boolean result = m_Controller.getShuffleManager().toggleImage(m_Background.getSource());
                 box.setSelected(result);
             });
+            m_Controller.getShuffleManager().addToggleListener( (img, added) -> {
+               if(m_Background.getSource() == img){
+                   box.setSelected(added);
+               }
+            });
             box.setSelected(m_Controller.getShuffleManager().has(m_Background.getSource()));
             
             p2.add(box);

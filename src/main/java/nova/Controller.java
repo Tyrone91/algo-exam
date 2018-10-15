@@ -9,22 +9,26 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import javax.swing.SwingUtilities;
 
 public class Controller {
     
+    private Set<Consumer<AlgoImage>> m_NewMainImageListener = new HashSet<>();
+    private Set<StartUpListener> m_StartUpListener  = new HashSet<>();
+    
     private MainFrame m_MainFrame;
     private ImageHandler m_ImageHandler;
-    private Set<StartUpListener> m_StartUpListener;
+    
     private ShuffleManager m_ShuffleManager;
     private ImageTool m_CurrentTool;
     private AlgoImage m_CurrentImage;
     private List<ImageTool> m_Tools = Arrays.asList(new DrawTool());
 
     public Controller(){
-        m_StartUpListener = new HashSet<>();
+       
         m_MainFrame = new MainFrame(this);
         m_ImageHandler = new ImageHandler();
         m_ShuffleManager = new ShuffleManager(this);
@@ -76,6 +80,10 @@ public class Controller {
         m_StartUpListener.add(listener);
     }
     
+    public void addNewMainImageListener(Consumer<AlgoImage> listener){
+        m_NewMainImageListener.add(listener);
+    }
+    
     public void loadImagesCommand(){
         m_MainFrame.openImageFileChooser();
     }
@@ -110,6 +118,7 @@ public class Controller {
         m_MainFrame.setCenterImage(image);
         m_CurrentImage = image;
         m_CurrentTool.onImageChange(image);
+        m_NewMainImageListener.forEach(l -> l.accept(image));
     }
 
     public ShuffleManager getShuffleManager(){
@@ -156,5 +165,18 @@ public class Controller {
     
     public Color openColorChooser(){
         return m_MainFrame.openColorChooser();
+    }
+    
+    public void addAllImagesToShuffle(){
+        m_ImageHandler.getImages().stream()
+            .filter(Utils.not(m_ShuffleManager::has))
+            .forEach(m_ShuffleManager::toggleImage);
+    }
+    
+    public void removeAllImagesFromShuffle() {
+        if(m_ShuffleManager.isRunning()){
+            return;
+        }
+        m_ShuffleManager.clear();
     }
 }

@@ -2,6 +2,7 @@ package nova;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
@@ -16,27 +17,34 @@ import java.util.Arrays;
 import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
+import javax.swing.JButton;
 import javax.swing.JColorChooser;
+import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.filechooser.FileFilter;
 
 public class MainFrame extends JFrame implements Controller.StartUpListener {
+    
+    
 
     private Controller m_Controller;
     private UIImageList m_ImageList;
     private UIAlgoImage m_CenterImage;
     private QuickNavigationBar m_NavBar;
+    private JComponent m_SouthBar;
 
     public MainFrame(Controller controller){
         super("ALGO: Assignment 1.0");
         setLayout( new BorderLayout());
-
+        m_SouthBar = new JPanel();
         m_NavBar = new QuickNavigationBar();
 
         m_NavBar
@@ -57,16 +65,7 @@ public class MainFrame extends JFrame implements Controller.StartUpListener {
                 m_Controller.closeApp();
             }
         });
-        
-        JLabel stuff = new JLabel(); //TODO: rename
-        add(stuff, BorderLayout.SOUTH);
-        addComponentListener( new ComponentAdapter() {
-            @Override
-            public void componentResized(ComponentEvent e) {
-                if(m_CenterImage != null)
-                    stuff.setText( "x:" + m_CenterImage.getXScaleOfImage() );
-            }
-        });
+          
     }
 
     @Override
@@ -75,24 +74,80 @@ public class MainFrame extends JFrame implements Controller.StartUpListener {
         m_CenterImage = new UIAlgoImage();
         m_ImageList = new UIImageList( controller, controller.getImageHandler());
         setJMenuBar(initMenuBar(controller));
+        initSouthBar(controller, m_SouthBar);
         
         
-        final JScrollPane listPane = new JScrollPane(m_ImageList);
-        add(listPane, BorderLayout.EAST);
-        add(m_CenterImage, BorderLayout.CENTER);
+        final JScrollPane imgPane = new JScrollPane(m_CenterImage);
+        add(m_ImageList, BorderLayout.EAST);
+        add(imgPane, BorderLayout.CENTER);
         add(m_NavBar,BorderLayout.NORTH);
+        add(m_SouthBar, BorderLayout.SOUTH);
         
-        m_CenterImage.addMouseListener(new MouseAdapter() {
+        applyListenerTo(m_CenterImage, controller);
+        
+        
+    }
+    
+    private void initSouthBar(Controller controller, JComponent target){
+        target.setLayout( new BorderLayout());
+        final JLabel imgScaleLabel = new JLabel(getImageScaleAsText());
+        m_CenterImage.addComponentListener( new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                imgScaleLabel.setText(getImageScaleAsText());
+            }
+        });
+        controller.addNewMainImageListener( img -> imgScaleLabel.setText(getImageScaleAsText()));
+        
+        JLabel scaleLabel = new JLabel("100%");
+        
+        JScrollBar scaleBar = new JScrollBar(JScrollBar.HORIZONTAL, 100, 1, 5, 300);
+        scaleBar.addAdjustmentListener( evt -> {
+            
+            m_CenterImage.setScale( scaleBar.getValue()/100f);
+            m_CenterImage.setPreferredSize(m_CenterImage.getSizeByScale());
+            m_CenterImage.setSize(m_CenterImage.getSizeByScale());
+            
+            validate();
+        });
+        
+        JButton fitBttn = UtilsUI.createBttn("fit", bttn -> {
+            m_CenterImage.setAutoFit(true);
+            Dimension parent =  m_CenterImage.getParent().getSize();
+            m_CenterImage.setPreferredSize(parent);
+            m_CenterImage.setSize(parent);
+            validate();
+            repaint();
+        });
+        
+        JPanel scalePane = new JPanel( new BorderLayout());
+        scalePane.add(scaleLabel, BorderLayout.WEST);
+        scalePane.add(scaleBar, BorderLayout.CENTER);
+        scalePane.add(fitBttn, BorderLayout.EAST);
+        
+        target.add(imgScaleLabel, BorderLayout.EAST);
+        target.add(scalePane, BorderLayout.CENTER);
+    }
+    
+    private String getImageScaleAsText(){
+        if(m_CenterImage != null){
+            return "x:" + String.format("%.2f", m_CenterImage.getXScaleOfImage())  + " y:" + String.format("%.2f", m_CenterImage.getYScaleOfImage());
+        }
+        return "";
+    }
+    
+    private void applyListenerTo(UIAlgoImage image, Controller controller){
+        image.addMouseListener(new MouseAdapter() {
             
             @Override
             public void mouseReleased(MouseEvent e) {
-                if(m_CenterImage.getSource() != null)
+                if(image.getSource() != null)
                     controller.getCurrentTool().onReleased(fixXOffset(e.getX()), fixYOffset(e.getY()));
             }
             
             @Override
             public void mousePressed(MouseEvent e) {
-                if(m_CenterImage.getSource() != null)
+                if(image.getSource() != null)
                     controller.getCurrentTool().onPressed(fixXOffset(e.getX()), fixYOffset(e.getY()));
             }
             
@@ -104,7 +159,7 @@ public class MainFrame extends JFrame implements Controller.StartUpListener {
         });
         
         
-        m_CenterImage.addMouseMotionListener( new MouseMotionListener() {
+        image.addMouseMotionListener( new MouseMotionListener() {
             
             @Override
             public void mouseMoved(MouseEvent e) {
@@ -114,12 +169,29 @@ public class MainFrame extends JFrame implements Controller.StartUpListener {
             
             @Override
             public void mouseDragged(MouseEvent e) {
-                if(m_CenterImage.getSource() != null)
+                if(image.getSource() != null)
                     controller.getCurrentTool().onMove(fixXOffset(e.getX()), fixYOffset(e.getY()));
                 
             }
         });
-        
+    }
+    
+    private int fixXOffset(int x){
+        return (int)(m_CenterImage.getXScaleOfImage() * x);
+    }
+    
+    private int fixYOffset(int y){
+        return (int)(m_CenterImage.getYScaleOfImage() * y);
+    }
+
+    private JMenuBar initMenuBar(Controller controller){
+        final JMenuBar bar = new JMenuBar();
+        bar.add( initFileMenu(controller));
+        bar.add( initActionMenu(controller));
+        bar.add( initToolMenu(controller));
+        return bar;
+    }
+    private JMenu initToolMenu(Controller controller){
         JMenu toolMenu = new JMenu("Tools");
         for(ImageTool tool : controller.getTools()){
             tool.initNavigationBarContext(m_NavBar);
@@ -136,22 +208,7 @@ public class MainFrame extends JFrame implements Controller.StartUpListener {
             //item.setText(tool.getName());
             toolMenu.addSeparator();
         }
-        getJMenuBar().add(toolMenu);
-    }
-    
-    private int fixXOffset(int x){
-        return (int)(m_CenterImage.getXScaleOfImage() * x);
-    }
-    
-    private int fixYOffset(int y){
-        return (int)(m_CenterImage.getYScaleOfImage() * y);
-    }
-
-    private JMenuBar initMenuBar(Controller controller){
-        final JMenuBar bar = new JMenuBar();
-        bar.add( initFileMenu(controller));
-        bar.add( initActionMenu(controller));
-        return bar;
+        return toolMenu;
     }
 
     private JMenu initFileMenu(Controller controller){
@@ -179,13 +236,29 @@ public class MainFrame extends JFrame implements Controller.StartUpListener {
         });
         shuffleToggle.setEnabled(false);
         menu.add(shuffleToggle);
+        JButton bttnShuffleToggle = UtilsUI.createBttn("on/off", bttn -> {
+           m_Controller.toggleShuffle();
+           if(m_Controller.getShuffleManager().isRunning() ){
+               shuffleToggle.setText("End shuffle");
+           } else {
+               shuffleToggle.setText("Start shuffle");
+           }
+        });
+        bttnShuffleToggle.setEnabled(false);
         controller.getShuffleManager().addToggleListener( (img, added) -> {
             shuffleToggle.setEnabled(controller.getShuffleManager().isReady());
+            bttnShuffleToggle.setEnabled(controller.getShuffleManager().isReady());
+            
         });
         
-        menu.add( UtilsUI.createItem("Add all", () -> {
-            
-        }));
+        m_NavBar
+            .addNavEntry("Shuffle", bttnShuffleToggle)
+            .addNavEntry("Shuffle", UtilsUI.createBttn("all", controller::addAllImagesToShuffle))
+            .addNavEntry("Shuffle", UtilsUI.createBttn("none", controller::removeAllImagesFromShuffle));
+        
+        
+        menu.add( UtilsUI.createItem("Add all", controller::addAllImagesToShuffle));
+        menu.add( UtilsUI.createItem("remove all", controller::removeAllImagesFromShuffle));
         return menu;   
     }
 
@@ -237,7 +310,6 @@ public class MainFrame extends JFrame implements Controller.StartUpListener {
     public Color openColorChooser(){
         return JColorChooser.showDialog(this, "Please select a color", Color.BLACK);
     }
+   
         
-        
-
 }
