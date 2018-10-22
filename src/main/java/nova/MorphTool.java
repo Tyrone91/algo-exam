@@ -12,7 +12,8 @@ public class MorphTool implements ImageTool{
     private AlgoImage m_Target;
     private Point m_FirstClick;
     private Matrix m_Calc = Matrix.unit();
-    private boolean m_RotateInCenter = true;
+    private Matrix m_LastCalc = Matrix.unit();
+    private boolean m_RotateInCenter = false;
 
     private void selectRotateMode(){
 
@@ -20,8 +21,8 @@ public class MorphTool implements ImageTool{
 
     private void rotate(float alpha){
         long start  = System.currentTimeMillis();
-        int xtrans = 0;
-        int ytrans = 0;
+        int xtrans = m_FirstClick.x;
+        int ytrans = m_FirstClick.y;
         if(m_RotateInCenter){
             xtrans = m_Target.getWidth()/2;
             ytrans = m_Target.getHeight()/2;
@@ -31,7 +32,7 @@ public class MorphTool implements ImageTool{
             Matrix.inverseTranslate(-xtrans, -ytrans),
             Matrix.inverseRotate(alpha),
             Matrix.inverseTranslate(xtrans, ytrans));
-        m_Calc = m;
+        m_LastCalc = m;
         
         m_Target.resetToBuffer();
         int startX = 0;
@@ -99,9 +100,10 @@ public class MorphTool implements ImageTool{
     @Override
     public void onMove(int x, int y) {
         if(m_FirstClick != null){
-            int d = x - m_FirstClick.x;
-            float alpha  = d/100f;
-            rotate(alpha);
+            m_LastCalc = Matrix.unit();
+            int d = (x - m_FirstClick.x);
+            double alpha  = d *  Math.PI / 180.0;
+            rotate((float)alpha);
         }
     }
 
@@ -118,6 +120,7 @@ public class MorphTool implements ImageTool{
     @Override
     public void onReleased(int x, int y) {
         m_FirstClick = null;
+        m_Calc = m_LastCalc;
     }
 
     @Override
