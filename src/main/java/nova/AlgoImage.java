@@ -1,6 +1,7 @@
 package nova;
 
 import java.awt.Image;
+import java.awt.Rectangle;
 import java.awt.image.MemoryImageSource;
 import java.awt.image.PixelGrabber;
 import java.util.Arrays;
@@ -91,6 +92,10 @@ public class AlgoImage {
         }
     }
 
+    public boolean hasBuffer() {
+        return m_TmpImageBuffer != null;
+    }
+
     public void clearBuffer(){
         m_TmpImageBuffer = null;
     }
@@ -114,5 +119,38 @@ public class AlgoImage {
 
     public int get(int i){
         return m_ImagePix[i];
+    }
+
+    public int getPx(int x, int y){
+        return m_ImagePix[toIndex(x, y)];
+    }
+
+    public void apply(Matrix op) {
+        apply(op, new Rectangle(getWidth(), getHeight()));
+    }
+
+    public void apply(Matrix op, Rectangle range) {
+        final int w = getWidth();
+        final int h = getHeight();
+        final Vector3 p = Vector3.of(0,0);
+
+        for(int y = 0; y < h; ++y){
+            for(int x = 0; x < w; ++x){
+                p.setX(x).setY(y);
+                final Vector3 pCurrent = Matrix.mult(op, p);
+                final int px = (int)pCurrent.getX();
+                final int py = (int)pCurrent.getY();
+
+                if(!range.contains(px, py)){
+                    continue;
+                }
+
+                int val = 0xFFFFFFFF;
+                if(inRange(px,py)){
+                    val = getBufferData(px, py);
+                }
+                setPx(x, y, val);
+            }
+        }
     }
 }

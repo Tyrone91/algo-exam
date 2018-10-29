@@ -231,6 +231,12 @@ public class MainFrame extends JFrame implements Controller.StartUpListener {
 
     private JMenu initActionMenu(Controller controller){
         final JMenu menu = new JMenu("Actions");
+
+        menu.add( UtilsUI.createItem("New", () -> {
+            controller.createNewBlankImage(400, 200);
+        }));
+
+        m_NavBar.addNavEntry("New", "+", (ctrl) -> controller.createNewBlankImage(400,200));
         
         final JMenuItem shuffleToggle = UtilsUI.createItem("Start shuffle", (item) -> {
             m_Controller.toggleShuffle();

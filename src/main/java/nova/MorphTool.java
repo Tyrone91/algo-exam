@@ -4,8 +4,6 @@ import java.awt.Point;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.swing.text.DefaultEditorKit.CutAction;
-
 public class MorphTool implements ImageTool{
 
     private Controller m_Controller;

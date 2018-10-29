@@ -2,6 +2,7 @@ package nova;
 
 import java.awt.Color;
 import java.awt.Image;
+import java.awt.Rectangle;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,7 +26,15 @@ public class Controller {
     private ShuffleManager m_ShuffleManager;
     private ImageTool m_CurrentTool;
     private AlgoImage m_CurrentImage;
-    private List<ImageTool> m_Tools = Arrays.asList(new DrawTool(), new MorphTool());
+    private List<ImageTool> m_Tools = Arrays.asList(
+        new DrawTool(),
+        //new MorphTool(),
+        new RotateTool(),
+        new SelectionTool(),
+        new TranslateTool());
+
+    private Rectangle m_ImageSelection;
+    private Matrix m_ImageOperations = Matrix.unit();
 
     public Controller(){
        
@@ -157,6 +166,9 @@ public class Controller {
     }
     
     public void activateTool(ImageTool tool){
+        if(m_CurrentTool != null){
+            m_CurrentTool.onClose(this);
+        }
         m_CurrentTool = tool;
         tool.onInit(this, m_CurrentImage);
     }
@@ -184,5 +196,53 @@ public class Controller {
             return;
         }
         m_ShuffleManager.clear();
+    }
+
+    public void setSelectedImageArea(Rectangle rect) {
+        m_ImageSelection = rect;
+    }
+
+    public void setSelectedImageArea(int x, int y, int w, int h) {
+        setSelectedImageArea( new Rectangle(x, y, w, h));
+    }
+
+    public Rectangle getSelectedImageArea(){
+        return m_ImageSelection;
+    }
+
+    public AlgoImage createNewBlankImage(int w, int h){
+        final AlgoImage res = new AlgoImage(w, h);
+        for(int i = 0; i < res.raw().length; ++i){
+            res.set(i, 0xFFFFFFFF);
+        }
+        m_ImageHandler.addImage(res);
+        return res;
+    }
+
+    public void clearImageOperations() {
+        m_ImageOperations = Matrix.unit();
+    }
+
+    public Matrix getImageOperations() {
+        return m_ImageOperations;
+    }
+
+    public void setImageOperations(Matrix op) {
+        m_ImageOperations = op;
+    }
+
+    public void applyOperations(){
+        final AlgoImage target = m_CurrentImage;
+        Rectangle rect = m_ImageSelection;
+        if(rect == null){
+            rect = new Rectangle(target.getWidth(), target.getHeight());
+        }
+        if(target.hasBuffer()){
+            target.resetToBuffer();
+        }
+        target.apply(m_ImageOperations, rect);
+        target.update();
+        target.clearBuffer();
+        clearImageOperations();
     }
 }

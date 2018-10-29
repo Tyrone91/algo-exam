@@ -2,8 +2,10 @@ package nova;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Graphics;
+import java.awt.ScrollPane;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -15,6 +17,7 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 
 public class QuickNavigationBar extends JComponent {
 
@@ -22,7 +25,7 @@ public class QuickNavigationBar extends JComponent {
     private Controller m_Controller;
 
     public QuickNavigationBar(Controller controller){
-        setLayout( new FlowLayout(FlowLayout.LEFT));
+        setLayout( new BorderLayout());
         m_Entries = new HashMap<>();
         m_Controller = controller;
     }
@@ -50,9 +53,17 @@ public class QuickNavigationBar extends JComponent {
 
     public void update(){
         removeAll();
+        final JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        final JScrollPane pane = new JScrollPane(panel);
+        pane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
+        pane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+        
         setBorder( BorderFactory.createMatteBorder(0, 0, 1, 0, Color.BLACK));
         m_Entries.values().forEach(NavEntry::update);
-        m_Entries.values().forEach(this::add);
+        m_Entries.values().forEach(panel::add);
+        
+        setPreferredSize( new Dimension(0,60));
+        add(pane);
     }
 
     @Override

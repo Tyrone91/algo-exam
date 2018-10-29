@@ -2,6 +2,7 @@ package nova;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Rectangle;
 
 public class Bresenham {
     
@@ -59,5 +60,25 @@ public class Bresenham {
                 target.setColor( new Color(color));
                 target.drawLine(x, y, x, y);
             }, x0, y0, x1, y1, 0xFF0000, 0xFF0000 );
+    }
+
+    public static void selection(AlgoImage target, Rectangle rect){
+        selection(target, rect.x, rect.y, rect.width, rect.height);
+    }
+
+    public static void selection(AlgoImage target, int x, int y, int w, int h){
+        final int len = 3;
+        final int gap = 2;
+        for(int i = 0; i + len <= w; i += (len + gap)){
+            int px = i + x;
+            line(target, px, y, px + len, y);
+            line(target, px, y + h, px + len, y + h);
+        }
+
+        for(int i = 0; i + len < h; i += len + gap){
+            int py = i + y;
+            line(target, x, py, x, py + len);
+            line(target, x+w, py, x+w, py + len);
+        }
     }
 }
