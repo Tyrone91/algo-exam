@@ -1,6 +1,7 @@
 package nova;
 
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Image;
 import java.awt.Rectangle;
 import java.io.File;
@@ -227,6 +228,12 @@ public class Controller {
         return m_ImageOperations;
     }
 
+    public Matrix applyToImageOperations(Matrix m){
+        final Matrix res = Matrix.mult(m_ImageOperations, m);
+        m_ImageOperations = res;
+        return res;
+    }
+
     public void setImageOperations(Matrix op) {
         m_ImageOperations = op;
     }
@@ -239,10 +246,10 @@ public class Controller {
         }
         if(target.hasBuffer()){
             target.resetToBuffer();
+            target.apply(m_ImageOperations, rect);
+            target.update();
+            target.clearBuffer();
         }
-        target.apply(m_ImageOperations, rect);
-        target.update();
-        target.clearBuffer();
         clearImageOperations();
     }
 }

@@ -61,9 +61,9 @@ public class UIAlgoImage extends JComponent{
         
         float s = m_Image.getWidth(this) < getWidth() ? 1 : 1 / m_Scale;
         if(m_Image.getWidth(this) <= getWidth()){
-            return (float)m_Image.getWidth(this) / getWidth() * s;
+            return (float)m_Image.getWidth(this)  / getWidth() * s;
         } else {
-            return (float)Math.floor((float)m_Image.getWidth(this) / getWidth()) * s;
+            return (float)Math.floor((float)m_Image.getWidth(this) / getWidth() * s);
         }
         
         //return (float)m_Image.getWidth(this) / getWidth() * s;
@@ -78,9 +78,7 @@ public class UIAlgoImage extends JComponent{
             return (float)m_Image.getHeight(this) / getHeight();
         }
         
-        float s = m_Image.getHeight(this) < getHeight() ? 1 : 1 / m_Scale;
-//        return (float)m_Image.getHeight(this) / getHeight() * s;
-        
+        float s = m_Image.getHeight(this) < getHeight() ? 1 : 1 / m_Scale;     
         if(m_Image.getHeight(this) <= getHeight()){
             return (float)m_Image.getHeight(this) / getHeight() * s;
         } else {
@@ -89,6 +87,9 @@ public class UIAlgoImage extends JComponent{
     }
     
     public Dimension getSizeByScale(){
+        if(m_AutoFit) {
+            return getSize();    
+        }
         return new Dimension((int)(m_Image.getWidth(this) * m_Scale), (int)(m_Image.getHeight(this) * m_Scale));
     }
     

@@ -19,7 +19,7 @@ public class RotateTool extends AbstractMorphTool {
         int ytrans = m_FirstClick.y;
         
         Matrix m = Matrix.mult(
-            controller().getImageOperations(),
+            //controller().getImageOperations(),
             Matrix.inverseTranslate(-xtrans, -ytrans),
             Matrix.inverseRotate(alpha),
             Matrix.inverseTranslate(xtrans, ytrans));
@@ -70,7 +70,7 @@ public class RotateTool extends AbstractMorphTool {
     @Override
     public void onReleased(int x, int y) {
         m_FirstClick = null;
-        controller().setImageOperations(m_LastCalc);
+        controller().applyToImageOperations(m_LastCalc);
     }
 
     @Override

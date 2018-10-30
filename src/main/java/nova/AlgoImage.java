@@ -130,6 +130,9 @@ public class AlgoImage {
     }
 
     public void apply(Matrix op, Rectangle range) {
+        if(!hasBuffer()){
+            //createBuffer();
+        }
         final int w = getWidth();
         final int h = getHeight();
         final Vector3 p = Vector3.of(0,0);
@@ -144,12 +147,13 @@ public class AlgoImage {
                 if(!range.contains(px, py)){
                     continue;
                 }
-
+                
                 int val = 0xFFFFFFFF;
                 if(inRange(px,py)){
                     val = getBufferData(px, py);
                 }
                 setPx(x, y, val);
+                setPx(px,px, 0xFFFFFFFF);
             }
         }
     }

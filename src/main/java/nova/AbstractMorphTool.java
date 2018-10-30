@@ -47,6 +47,7 @@ public abstract class AbstractMorphTool implements ImageTool {
 
     @Override
     public void onImageChange(AlgoImage newImage) {
+        controller().applyOperations();
         m_TargetImage = newImage;
         if( target().hasBuffer() ){
             target().resetToBuffer();
@@ -74,6 +75,6 @@ public abstract class AbstractMorphTool implements ImageTool {
         if(m_TargetImage.hasBuffer()){
             m_TargetImage.resetToBuffer();
         }
-        controller.applyOperations();
+        //controller.applyOperations();
     }
 }

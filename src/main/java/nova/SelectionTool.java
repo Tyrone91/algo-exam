@@ -12,8 +12,8 @@ public class SelectionTool extends AbstractMorphTool {
 
     private void clear(){
         m_PasteSource = null;
-        controller().setSelectedImageArea(null);
         render(Matrix.unit(), true);
+        controller().setSelectedImageArea(null);
     }
 
     private void activateTool(Controller controller){

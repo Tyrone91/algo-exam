@@ -29,17 +29,15 @@ public class TranslateTool extends AbstractMorphTool {
 
     @Override
     public void onReleased(int x, int y) {
-        controller().setImageOperations(m_Last);
+        controller().applyToImageOperations(m_Last);
     }
 
     @Override
     public void onMove(int x, int y) {
         final int dx = m_FirstClick.x - x;
         final int dy = m_FirstClick.y - y;
-        final Matrix m = Matrix.mult(
-            controller().getImageOperations(),
-            Matrix.inverseTranslate(-dx, -dy));
-        render(m, true);
+        final Matrix m = Matrix.inverseTranslate(-dx, -dy);
+        render( m, true);
         m_Last = m;
     }
 
