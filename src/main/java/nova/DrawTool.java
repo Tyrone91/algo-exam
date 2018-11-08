@@ -9,6 +9,12 @@ import javax.swing.JButton;
 
 public class DrawTool implements ImageTool {
     
+    private interface DrawMode {
+        public void draw(int x0, int y0, int x1, int y1);
+    }
+    
+   
+    
     private AlgoImage m_Target;
     private Controller m_Controller;
     private boolean m_isDragging = false;
@@ -20,9 +26,18 @@ public class DrawTool implements ImageTool {
     
     private JButton m_BttnColor1;
     private JButton m_BttnColor2;
+    
+    private DrawMode m_CurrentMode = this::line;
+    private boolean m_Filled = true;
+    
 
     private void line(int x1, int y1, int x2, int y2){
         Bresenham.line(m_Target, x1, y1, x2, y2, m_Color1.getRGB(), m_Color2.getRGB());
+        m_Target.getImageSource().newPixels();
+    }
+    
+    private void circle(int x1, int y1, int x2, int y2){
+        Bresenham.circle(m_Target, x1, y1, x2, y2,m_Color1.getRGB(),  m_Color2.getRGB(), m_Filled );
         m_Target.getImageSource().newPixels();
     }
     
@@ -38,6 +53,7 @@ public class DrawTool implements ImageTool {
 
     @Override
     public void onInit(Controller controller, AlgoImage currentImage) {
+        controller.applyOperations();
         m_Target = currentImage;
         m_Controller = controller;
     }
@@ -57,7 +73,7 @@ public class DrawTool implements ImageTool {
     public void onMove(int x, int y) {
         if(m_isDragging){
             m_Target.resetToBuffer();
-            line(m_FirstClick.x, m_FirstClick.y, x, y);
+            m_CurrentMode.draw(m_FirstClick.x, m_FirstClick.y, x, y);
             m_SecondClick = new Point(x,y);
         }
     }
@@ -78,7 +94,7 @@ public class DrawTool implements ImageTool {
         m_isDragging = false;
         if(m_FirstClick != null && m_SecondClick != null){
 
-            line(m_FirstClick.x, m_FirstClick.y, m_SecondClick.x, m_SecondClick.y);
+            m_CurrentMode.draw(m_FirstClick.x, m_FirstClick.y, m_SecondClick.x, m_SecondClick.y);
             m_Target.clearBuffer();
 
             m_FirstClick = null;
@@ -114,8 +130,9 @@ public class DrawTool implements ImageTool {
         m_BttnColor2.setBackground(m_Color2);
         
         bar
-            .addNavEntry("Draw", "---", (ctrl) -> { ctrl.activateTool(this);})
-            .addNavEntry("Draw", "●", (ctrl) -> {})
+            .addNavEntry("Draw", "---", (ctrl) -> { ctrl.activateTool(this); this.m_CurrentMode = this::line;})
+            .addNavEntry("Draw", "●", (ctrl) -> {ctrl.activateTool(this); this.m_CurrentMode = this::circle; m_Filled = true;})
+            .addNavEntry("Draw", "◌", (ctrl) -> {ctrl.activateTool(this); this.m_CurrentMode = this::circle; m_Filled = false;})
             .addNavEntry("Draw", m_BttnColor1)
             .addNavEntry("Draw", m_BttnColor2)
             

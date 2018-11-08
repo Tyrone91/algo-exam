@@ -142,14 +142,26 @@ public class MainFrame extends JFrame implements Controller.StartUpListener {
             
             @Override
             public void mouseReleased(MouseEvent e) {
-                if(image.getSource() != null)
-                    controller.getCurrentTool().onReleased(fixXOffset(e.getX()), fixYOffset(e.getY()));
+                if(image.getSource() != null) {
+                    int x = fixXOffset(e.getX());
+                    int y = fixYOffset(e.getY());
+                    
+                    if(image.getSource().inRange(x, y)){
+                        controller.getCurrentTool().onReleased(x,y );
+                    }
+                }
             }
             
             @Override
             public void mousePressed(MouseEvent e) {
-                if(image.getSource() != null)
-                    controller.getCurrentTool().onPressed(fixXOffset(e.getX()), fixYOffset(e.getY()));
+                if(image.getSource() != null) {
+                    int x = fixXOffset(e.getX());
+                    int y = fixYOffset(e.getY());
+                    
+                    if(image.getSource().inRange(x, y)){
+                        controller.getCurrentTool().onPressed(x,y );
+                    }
+                }
             }
             
             @Override
@@ -170,23 +182,30 @@ public class MainFrame extends JFrame implements Controller.StartUpListener {
             
             @Override
             public void mouseDragged(MouseEvent e) {
-                if(image.getSource() != null)
-                    controller.getCurrentTool().onMove(fixXOffset(e.getX()), fixYOffset(e.getY()));
+                if(image.getSource() != null) {
+                    int x = fixXOffset(e.getX());
+                    int y = fixYOffset(e.getY());
+                    System.out.println(String.format("x:%s y:%s", e.getX(), e.getY()));
+                    
+                    if(image.getSource().inRange(x, y)){                        
+                        controller.getCurrentTool().onMove(x,y );
+                    }
+                }
                 
             }
         });
     }
     
     private int fixXOffset(int x){
-        int offset = m_CenterImage.getWidth() /2 - m_CenterImage.getSizeByScale().width / 2;
+        int offset = 0;//m_CenterImage.getWidth() /2 - m_CenterImage.getSizeByScale().width / 2;
         x -= offset;
-        return (int)(m_CenterImage.getXScaleOfImage() * x);
+        return (int)Math.round(m_CenterImage.getXScaleOfImage() * x);
     }
     
     private int fixYOffset(int y){
-        int offset = m_CenterImage.getHeight() /2 - m_CenterImage.getSizeByScale().height / 2;
+        int offset = 0;//m_CenterImage.getHeight() /2 - m_CenterImage.getSizeByScale().height / 2;
         y -= offset;
-        return (int)(m_CenterImage.getYScaleOfImage() * y);
+        return (int)Math.round(m_CenterImage.getYScaleOfImage() * y);
     }
 
     private JMenuBar initMenuBar(Controller controller){
@@ -223,6 +242,11 @@ public class MainFrame extends JFrame implements Controller.StartUpListener {
             controller.loadImagesCommand();
             validate();
         }));
+        
+        menu.add( UtilsUI.createItem("Analyse Image", () -> {
+            m_Controller.analyseCurrentImage();
+        }));
+        
         menu.add( UtilsUI.createItem("Exit", () -> {
             m_Controller.closeApp();
         }));

@@ -1,10 +1,11 @@
 package nova;
 
 import java.awt.Color;
-import java.awt.Cursor;
+import java.awt.Desktop;
 import java.awt.Image;
 import java.awt.Rectangle;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -29,10 +30,12 @@ public class Controller {
     private AlgoImage m_CurrentImage;
     private List<ImageTool> m_Tools = Arrays.asList(
         new DrawTool(),
-        //new MorphTool(),
         new RotateTool(),
         new SelectionTool(),
-        new TranslateTool());
+        new TranslateTool(),
+        new ScaleTool(),
+        new XShereTool(),
+        new YShereTool());
 
     private Rectangle m_ImageSelection;
     private Matrix m_ImageOperations = Matrix.unit();
@@ -251,5 +254,15 @@ public class Controller {
             target.clearBuffer();
         }
         clearImageOperations();
+    }
+    
+    public void analyseCurrentImage() {
+        try {
+            File dir = new File(System.getProperty("user.dir"));
+            new ColorAnalyser(m_CurrentImage).toFile( new File(dir, "color-data.txt") );
+            Desktop.getDesktop().open( dir);
+        } catch(IOException e) {
+            
+        }
     }
 }

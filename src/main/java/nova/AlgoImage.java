@@ -151,9 +151,9 @@ public class AlgoImage {
                 int val = 0xFFFFFFFF;
                 if(inRange(px,py)){
                     val = getBufferData(px, py);
+                    //setPx(px,py, 0xFFFFFFFF);
                 }
                 setPx(x, y, val);
-                setPx(px,px, 0xFFFFFFFF);
             }
         }
     }

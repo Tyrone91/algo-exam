@@ -159,15 +159,21 @@ public class Matrix {
                           0, 0, 1);
     }
 
-    public static Matrix inverseScale(float xScale, float yScale){
-        return Matrix.of( 1, 0, 0,
-                          0, 1, 0,
+    public static Matrix inverseScale(float s){
+        return Matrix.of( 1/s, 0, 0,
+                          0, 1/s, 0,
                           0, 0, 1);
     }
 
-    public static Matrix inverseXScherung(int x, int y){
-        return Matrix.of( 1, 0, 0,
+    public static Matrix inverseXShear(float s){
+        return Matrix.of( 1, 1/s, 0,
                           0, 1, 0,
+                          0, 0, 1);
+    }
+    
+    public static Matrix inverseYShear(float s){
+        return Matrix.of( 1, 0, 0,
+                          1/s, 1, 0,
                           0, 0, 1);
     }
 }

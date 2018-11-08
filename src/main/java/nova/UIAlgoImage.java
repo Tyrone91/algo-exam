@@ -46,44 +46,49 @@ public class UIAlgoImage extends JComponent{
             int x = getWidth()/2 - imgW/2;
             int y = getHeight()/2 - imgH/2;
             
-            g.drawImage(m_Image, x, y, imgW, imgH, this);
+            g.drawImage(m_Image, 0, 0, imgW, imgH, this);
         }    
     }
     
-    public float getXScaleOfImage(){
-        if(m_Image == null){
-            return 0;
+    private double ratio(int imgSize,int componentSize){
+        
+        if(m_AutoFit || componentSize * m_Scale > imgSize) {
+            return (float)(imgSize) / componentSize;
         }
         
-        if(m_AutoFit){
-            return (float)m_Image.getWidth(this) / getWidth();
+        if((imgSize * m_Scale) < componentSize) {
+            float diff = componentSize - (imgSize * m_Scale);
+            System.out.println(diff);
+            return  (componentSize) / (componentSize - diff);
         }
         
-        float s = m_Image.getWidth(this) < getWidth() ? 1 : 1 / m_Scale;
-        if(m_Image.getWidth(this) <= getWidth()){
-            return (float)m_Image.getWidth(this)  / getWidth() * s;
-        } else {
-            return (float)Math.floor((float)m_Image.getWidth(this) / getWidth() * s);
+        if(imgSize <= componentSize){
+            return 1.0;
         }
         
-        //return (float)m_Image.getWidth(this) / getWidth() * s;
+        double scaledSize = componentSize * m_Scale;
+        if(m_AutoFit || scaledSize > imgSize){
+            return (float)(imgSize) / componentSize;
+        }
+        
+        return componentSize / (float)(imgSize);
+        
     }
     
-    public float getYScaleOfImage(){
-        if(m_Image == null){
+    public double getXScaleOfImage(){
+        if(m_Image == null) {
             return 0;
         }
-        
-        if(m_AutoFit){
-            return (float)m_Image.getHeight(this) / getHeight();
+        System.out.println(String.format("w: img: %s como: %s ratio: %s scale: %s", m_Image.getWidth(this), getWidth(), ratio(m_Image.getWidth(this), getWidth()), m_Scale));
+        return ratio(m_Image.getWidth(this), getWidth());
+    }
+    
+    public double getYScaleOfImage(){
+        if(m_Image == null) {
+            return 0;
         }
-        
-        float s = m_Image.getHeight(this) < getHeight() ? 1 : 1 / m_Scale;     
-        if(m_Image.getHeight(this) <= getHeight()){
-            return (float)m_Image.getHeight(this) / getHeight() * s;
-        } else {
-            return (float)Math.floor((float)m_Image.getHeight(this) / getHeight()) * s;
-        }
+        System.out.println(String.format("h: img: %s como: %s ratio: %s scale: %s", m_Image.getHeight(this), getHeight(), ratio(m_Image.getHeight(this), getHeight()), m_Scale));
+        return ratio(m_Image.getHeight(this), getHeight());
     }
     
     public Dimension getSizeByScale(){

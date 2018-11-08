@@ -27,8 +27,12 @@ public abstract class AbstractMorphTool implements ImageTool {
     protected void render(Matrix op, Rectangle range, boolean drawSelection) {
         final Matrix former = controller().getImageOperations();
         final Rectangle rect = controller().getSelectedImageArea();
-
-        target().resetToBuffer();
+        
+        if(target().hasBuffer()){            
+            target().resetToBuffer();
+        } else {
+            target().createBuffer();
+        }
         target().apply( Matrix.mult(former, op), range);
 
         if(drawSelection && rect != null) {

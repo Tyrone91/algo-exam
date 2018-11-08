@@ -10,6 +10,74 @@ public class Bresenham {
         public void render(int x, int y, int color);
     }
     
+    private static interface Circlesetter {
+        public void set(Renderer r, int x0, int y0, int x, int y, int color0, int color1);
+    }
+    
+    private static void circlepointfilled(Renderer r, int x0, int y0, int x, int y, int color0, int color1) {
+        
+        Bresenham.line(r, x0 -x , y0 + y, x0 + x, y0 + y, color0, color1);
+        Bresenham.line(r, x0 -x , y0 - y, x0 + x, y0 - y, color0, color1);
+        
+        Bresenham.line(r, x0 - y, y0 + x, x0 + y, y0 + x, color0, color1);
+        Bresenham.line(r, x0 - y, y0 - x, x0 + y, y0 - x, color0, color1);
+    }
+    
+    private static int hackR = 0; //TODO: think about this
+    
+    private static void circlepoint(Renderer r, int x0, int y0, int x, int y, int color0, int color1) {
+        double rad = hackR;
+        
+        int color = ColorUtils.gradient(color0, color1, (int)Math.round((x/rad) * 100));
+        System.out.println("grad: " + (int)Math.round((y/rad) * 100));
+        r.render(x0 + x,y0 + y, color); // p_0
+        r.render(x0 - x,y0 + y, color); // p_1
+        r.render(x0 + x,y0 - y, color); // p_2
+        r.render(x0 - x,y0 - y, color); // p_3
+        r.render(x0 + y,y0 + x, color); // p_4
+        r.render(x0 - y,y0 + x, color); // p_5
+        r.render(x0 + y,y0 - x, color); // p_6
+        r.render(x0 - y,y0 - x, color); // p_7
+    }
+    
+    public static void circle(Circlesetter setter, Renderer renderer,int x0, int y0, int r, int color0, int color1) {
+        hackR = r;
+        int y = 0;
+        int x = r;
+        int F = -r;
+        int dy = 1;
+        int dyx = -2 * r + 3;
+        while (y <= x) {
+            setter.set(renderer,x0,y0,x,y,color0, color1);
+            ++y;
+            dy += 2;
+            dyx += 2;
+            if (F > 0) {
+                F += dyx;
+                --x;
+                dyx += 2;
+            } else {
+                F += dy;
+            }
+        }
+    }
+    
+    public static void circle(AlgoImage src, int x0, int y0, int x1, int y1,int color0, int color1, boolean filled) {
+        int a = x1 - x0;
+        int b = y1 - y0;
+        int r = (int) Math.round(Math.sqrt( a*a + b*b));
+        circle(src, x0, y0, r,color0, color1, filled);
+    }
+    
+    public static void circle(AlgoImage src, int x0, int y0, int r, int color0, int color1, boolean filled) {
+        Circlesetter setter = filled ? Bresenham::circlepointfilled : Bresenham::circlepoint;
+        circle(setter, (x,y,color) -> {
+            if(src.inRange(x, y)){
+                src.setPx(x, y, color);
+            }
+        }, x0, y0, r, color0, color1);
+    }
+    
     private static void line(Renderer renderer, int x0, int y0, int x1, int y1, int color1, int color2){
         final int dx = Math.abs(x0-x1);
         final int dy = Math.abs(y0-y1);

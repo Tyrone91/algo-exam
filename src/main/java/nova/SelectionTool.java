@@ -12,7 +12,8 @@ public class SelectionTool extends AbstractMorphTool {
 
     private void clear(){
         m_PasteSource = null;
-        render(Matrix.unit(), true);
+        controller().applyOperations();
+        render(Matrix.unit(), false);
         controller().setSelectedImageArea(null);
     }
 
@@ -100,8 +101,8 @@ public class SelectionTool extends AbstractMorphTool {
     @Override
     public void initNavigationBarContext(QuickNavigationBar bar) {
         bar
-            .addNavEntry("Select", "+", this::activateTool)
-            .addNavEntry("Select", "-", ctrl -> this.clear())
+            .addNavEntry("Select", "▭", this::activateTool)
+            .addNavEntry("Select", "✗", ctrl -> this.clear())
             .addNavEntry("Select", "Copy", ctrl -> this.copy())
             .addNavEntry("Select", "Paste", ctrl -> this.paste())
             .update();
