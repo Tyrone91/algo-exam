@@ -1,5 +1,3 @@
-package nova;
-
 import java.awt.Rectangle;
 
 public abstract class AbstractMorphTool implements ImageTool {

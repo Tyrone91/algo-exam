@@ -1,4 +1,4 @@
-package nova;
+
 
 public class Matrix {
 
@@ -160,18 +160,27 @@ public class Matrix {
     }
 
     public static Matrix inverseScale(float s){
+        if(s == 0){
+            return Matrix.unit();
+        }
         return Matrix.of( 1/s, 0, 0,
                           0, 1/s, 0,
                           0, 0, 1);
     }
 
     public static Matrix inverseXShear(float s){
+        if(s == 0){
+            return Matrix.unit();
+        }
         return Matrix.of( 1, 1/s, 0,
                           0, 1, 0,
                           0, 0, 1);
     }
     
     public static Matrix inverseYShear(float s){
+        if(s == 0){
+            return Matrix.unit();
+        }
         return Matrix.of( 1, 0, 0,
                           1/s, 1, 0,
                           0, 0, 1);

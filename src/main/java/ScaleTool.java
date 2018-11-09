@@ -1,23 +1,23 @@
-package nova;
+
 
 import java.awt.Point;
 import java.util.Arrays;
 import java.util.List;
 
-public class YShereTool extends AbstractMorphTool {
+public class ScaleTool extends AbstractMorphTool {
     
     private Point m_FirstClick;
     private Matrix m_LastCalc = Matrix.unit();
 
-    private void shere(float scale){
-        Matrix m = Matrix.inverseYShear(scale);
+    private void scale(float scale){
+        Matrix m = Matrix.inverseScale(scale);
         m_LastCalc = m;
         render(m,true);
     }
 
     @Override
     public String getName() {
-        return "Y-Shere";
+        return "Scale";
     }
 
     @Override
@@ -27,13 +27,13 @@ public class YShereTool extends AbstractMorphTool {
 
     @Override
     public String getRepresentation() {
-        return "y-✂";
+        return "⇱";
     }
 
     @Override
     public List<ToolOption> getToolOptions() {
         return Arrays.asList(
-            ToolOption.of("y-✂", (ctrl) -> ctrl.activateTool(this))
+            ToolOption.of("Scale", (ctrl) -> ctrl.activateTool(this))
         );
     }
 
@@ -42,7 +42,7 @@ public class YShereTool extends AbstractMorphTool {
         if(m_FirstClick != null){
             m_LastCalc = Matrix.unit();
             float d =  (float)((x - m_FirstClick.x) * 0.015);
-            shere(d);
+            scale(1 + d);
         }
     }
 
@@ -62,7 +62,7 @@ public class YShereTool extends AbstractMorphTool {
 
     @Override
     public void initNavigationBarContext(QuickNavigationBar bar) {
-        bar.addNavEntry("Morph", "y-✂" , (ctrl) -> {
+        bar.addNavEntry("Morph", "⇱" , (ctrl) -> {
             ctrl.activateTool(this);
         });
     }
