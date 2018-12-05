@@ -19,7 +19,7 @@ public class TranslateTool extends AbstractMorphTool {
 
     @Override
     public String getRepresentation() {
-        return "🡘 🡙";
+        return "Move";
     }
 
     @Override

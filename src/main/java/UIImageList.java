@@ -160,17 +160,17 @@ public class UIImageList extends JComponent implements Controller.StartUpListene
             final JPanel panel = new JPanel();
             panel.setOpaque(false);
             panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-            final JButton bttnUp = UtilsUI.createBttn("⇧", () -> {
+            final JButton bttnUp = UtilsUI.createBttn("UP", () -> {
                 m_Handler.moveImageUp(m_Background.getSource());
                 updateImageList();
             });
             
-            final JButton bttnDown = UtilsUI.createBttn("⇩", () -> {
+            final JButton bttnDown = UtilsUI.createBttn("DOWN", () -> {
                 m_Handler.moveImageDown(m_Background.getSource());
                 updateImageList();
             });
 
-            final JButton bttnRemove = UtilsUI.createBttn("✗", () -> {
+            final JButton bttnRemove = UtilsUI.createBttn("X", () -> {
                 m_Handler.removeImage(m_Background.getSource());
                 updateImageList();
             });

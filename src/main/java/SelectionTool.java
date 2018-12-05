@@ -8,13 +8,17 @@ import java.util.List;
 public class SelectionTool extends AbstractMorphTool {
 
     private Point m_FirstClick;
-    private AlgoImage m_PasteSource;
+    private Matrix m_PasteOperations;
+    private AlgoImage m_PasteData;
+    private Rectangle m_PasteRectangle;
+    private boolean m_PasteMode = false;
 
     private void clear(){
-        m_PasteSource = null;
-        controller().applyOperations();
+        m_PasteMode = false;
+        controller().applyOperationsTo(target());
         render(Matrix.unit(), false);
         controller().setSelectedImageArea(null);
+        
     }
 
     private void activateTool(Controller controller){
@@ -22,32 +26,48 @@ public class SelectionTool extends AbstractMorphTool {
     }
 
     private void copy() {
-        m_PasteSource = target();
-    }
-
-    private void paste() {
+        m_PasteMode = false;
         Rectangle range = controller().getSelectedImageArea();
-        System.out.println("Pasting");
-        if(range == null){
-            return;
+        m_PasteOperations = Matrix.of(controller().getImageOperations());
+        m_PasteRectangle = new Rectangle(range);
+        
+        m_PasteData = new AlgoImage(range.width, range.height);
+        if(!target().hasBuffer() ) {
+            target().createBuffer();
+        } else {
+            target().resetToBuffer();
         }
-        if( m_PasteSource == null ) {
-            return;
-        }
-        System.out.println("transfer" + range);
+        target().apply(m_PasteOperations, range);
         for(int y = 0; y < range.height; ++y) {
-            for(int x = 0; x < range.width; ++x){
-                int px = range.x + x;
-                int py = range.y + y;
-
-                if(target().inRange(px, py) && m_PasteSource.inRange(px, py)){
-                    final int val = m_PasteSource.getPx(px, py);
-                    target().setPx(px, py, val);
-                }
+            for(int x = 0; x < range.width; ++x) {
+                m_PasteData.setPx(x, y, target().getBufferData(range.x + x, range.y +y));
             }
         }
-        target().clearBuffer();
-        target().update();
+        
+    }
+    
+    private void paste() {
+        Rectangle range = m_PasteRectangle;
+        paste(-range.x, -range.y);
+    }
+    
+    private void paste(int positionX, int positionY) {
+        Rectangle range = m_PasteRectangle;
+        AlgoImage source = m_PasteData;
+        source.createBuffer();
+        AlgoImage target = target();
+        if(target.hasBuffer()){
+            target.resetToBuffer();
+        } else {            
+            target.createBuffer();
+        }
+        
+        
+        target.apply(m_PasteOperations, range, source, -range.x, -range.y);
+        target.createBuffer();
+        target.update();
+        controller().setSelectedImageArea(null);
+        
     }
 
     @Override
@@ -61,7 +81,7 @@ public class SelectionTool extends AbstractMorphTool {
 
     @Override
     public void onPressed(int x, int y) {
-        controller().applyOperations();
+        controller().applyOperationsTo(target());
         if(target().hasBuffer()){
             target().resetToBuffer();
         }
@@ -101,10 +121,10 @@ public class SelectionTool extends AbstractMorphTool {
     @Override
     public void initNavigationBarContext(QuickNavigationBar bar) {
         bar
-            .addNavEntry("Select", "▭", this::activateTool)
-            .addNavEntry("Select", "✗", ctrl -> this.clear())
+            .addNavEntry("Select", "Sel.", this::activateTool)
+            .addNavEntry("Select", "X", ctrl -> this.clear())
             .addNavEntry("Select", "Copy", ctrl -> this.copy())
-            .addNavEntry("Select", "Paste", ctrl -> this.paste())
+            .addNavEntry("Select", "Paste", ctrl -> {this.activateTool(ctrl); this.paste();})
             .update();
     }
 }   

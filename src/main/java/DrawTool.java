@@ -53,7 +53,7 @@ public class DrawTool implements ImageTool {
 
     @Override
     public void onInit(Controller controller, AlgoImage currentImage) {
-        controller.applyOperations();
+        controller.applyOperationsTo(currentImage);
         m_Target = currentImage;
         m_Controller = controller;
     }
@@ -131,8 +131,8 @@ public class DrawTool implements ImageTool {
         
         bar
             .addNavEntry("Draw", "---", (ctrl) -> { ctrl.activateTool(this); this.m_CurrentMode = this::line;})
-            .addNavEntry("Draw", "●", (ctrl) -> {ctrl.activateTool(this); this.m_CurrentMode = this::circle; m_Filled = true;})
-            .addNavEntry("Draw", "◯", (ctrl) -> {ctrl.activateTool(this); this.m_CurrentMode = this::circle; m_Filled = false;})
+            .addNavEntry("Draw", "Circle(filled)", (ctrl) -> {ctrl.activateTool(this); this.m_CurrentMode = this::circle; m_Filled = true;})
+            .addNavEntry("Draw", "Circle", (ctrl) -> {ctrl.activateTool(this); this.m_CurrentMode = this::circle; m_Filled = false;})
             .addNavEntry("Draw", m_BttnColor1)
             .addNavEntry("Draw", m_BttnColor2)
             

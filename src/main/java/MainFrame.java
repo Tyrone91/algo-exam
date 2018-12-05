@@ -29,6 +29,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
+import javax.swing.JSlider;
 import javax.swing.filechooser.FileFilter;
 
 public class MainFrame extends JFrame implements Controller.StartUpListener {
@@ -46,16 +47,6 @@ public class MainFrame extends JFrame implements Controller.StartUpListener {
         setLayout( new BorderLayout());
         m_SouthBar = new JPanel();
         m_NavBar = new QuickNavigationBar(controller);
-        /*
-        m_NavBar
-
-            .addNavEntry("Morph", "🗘", () -> {})
-            .addNavEntry("Morph", "🡘 🡙", () -> {})
-            .addNavEntry("Morph", "✂", () -> {})
-            .addNavEntry("Morph", "⇱", () -> {})
-
-            .update();
-        */
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(720, 480);
@@ -85,6 +76,23 @@ public class MainFrame extends JFrame implements Controller.StartUpListener {
         add(m_SouthBar, BorderLayout.SOUTH);
         
         applyListenerTo(m_CenterImage, controller);
+        
+        final JPanel westPanel = new JPanel(new BorderLayout());
+        
+        final JSlider slider = new JSlider(JSlider.VERTICAL, 5, 100, 100);
+        slider.setMajorTickSpacing(25);
+        slider.setMinorTickSpacing(5);
+        slider.setSnapToTicks(true);
+        slider.setPaintLabels(true);
+        slider.setPaintTicks(true);
+        
+        
+        westPanel.add(slider, BorderLayout.CENTER);
+        westPanel.add( UtilsUI.createBttn("OK", () -> {
+            controller.reduceCurrentImage(slider.getValue());
+        }), BorderLayout.SOUTH);
+        
+        add(westPanel, BorderLayout.WEST);
         
         
     }
@@ -185,7 +193,7 @@ public class MainFrame extends JFrame implements Controller.StartUpListener {
                 if(image.getSource() != null) {
                     int x = fixXOffset(e.getX());
                     int y = fixYOffset(e.getY());
-                    System.out.println(String.format("x:%s y:%s", e.getX(), e.getY()));
+                    //System.out.println(String.format("x:%s y:%s", e.getX(), e.getY()));
                     
                     if(image.getSource().inRange(x, y)){                        
                         controller.getCurrentTool().onMove(x,y );
@@ -245,6 +253,10 @@ public class MainFrame extends JFrame implements Controller.StartUpListener {
         
         menu.add( UtilsUI.createItem("Analyse Image", () -> {
             m_Controller.analyseCurrentImage();
+        }));
+        
+        menu.add( UtilsUI.createItem("Reduce Image", () -> {
+            m_Controller.reduceCurrentImage(1);
         }));
         
         menu.add( UtilsUI.createItem("Exit", () -> {

@@ -27,13 +27,13 @@ public class YShereTool extends AbstractMorphTool {
 
     @Override
     public String getRepresentation() {
-        return "y-✂";
+        return "Y-Shere";
     }
 
     @Override
     public List<ToolOption> getToolOptions() {
         return Arrays.asList(
-            ToolOption.of("y-✂", (ctrl) -> ctrl.activateTool(this))
+            ToolOption.of(getRepresentation(), (ctrl) -> ctrl.activateTool(this))
         );
     }
 
@@ -65,7 +65,7 @@ public class YShereTool extends AbstractMorphTool {
 
     @Override
     public void initNavigationBarContext(QuickNavigationBar bar) {
-        bar.addNavEntry("Morph", "y-✂" , (ctrl) -> {
+        bar.addNavEntry("Morph", getRepresentation() , (ctrl) -> {
             ctrl.activateTool(this);
         });
     }

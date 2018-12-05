@@ -27,7 +27,7 @@ public class ScaleTool extends AbstractMorphTool {
 
     @Override
     public String getRepresentation() {
-        return "⇱";
+        return "Scale";
     }
 
     @Override
@@ -62,7 +62,7 @@ public class ScaleTool extends AbstractMorphTool {
 
     @Override
     public void initNavigationBarContext(QuickNavigationBar bar) {
-        bar.addNavEntry("Morph", "⇱" , (ctrl) -> {
+        bar.addNavEntry("Morph", "Scale" , (ctrl) -> {
             ctrl.activateTool(this);
         });
     }

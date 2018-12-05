@@ -114,6 +114,10 @@ public class Matrix {
         }
         return m;
     }
+    
+    public static Matrix of(Matrix src) {
+        return new Matrix().assign(src);
+    }
 
     private static void multHelp(Matrix a, Matrix b, Matrix target){
         target.forEach( (column,row,val) -> {

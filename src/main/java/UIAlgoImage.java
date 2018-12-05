@@ -79,7 +79,7 @@ public class UIAlgoImage extends JComponent{
         if(m_Image == null) {
             return 0;
         }
-        System.out.println(String.format("w: img: %s como: %s ratio: %s scale: %s", m_Image.getWidth(this), getWidth(), ratio(m_Image.getWidth(this), getWidth()), m_Scale));
+        //System.out.println(String.format("w: img: %s como: %s ratio: %s scale: %s", m_Image.getWidth(this), getWidth(), ratio(m_Image.getWidth(this), getWidth()), m_Scale));
         return ratio(m_Image.getWidth(this), getWidth());
     }
     
@@ -87,7 +87,7 @@ public class UIAlgoImage extends JComponent{
         if(m_Image == null) {
             return 0;
         }
-        System.out.println(String.format("h: img: %s como: %s ratio: %s scale: %s", m_Image.getHeight(this), getHeight(), ratio(m_Image.getHeight(this), getHeight()), m_Scale));
+        //System.out.println(String.format("h: img: %s como: %s ratio: %s scale: %s", m_Image.getHeight(this), getHeight(), ratio(m_Image.getHeight(this), getHeight()), m_Scale));
         return ratio(m_Image.getHeight(this), getHeight());
     }
     

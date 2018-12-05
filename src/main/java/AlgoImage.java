@@ -126,12 +126,17 @@ public class AlgoImage {
     }
 
     public void apply(Matrix op) {
-        apply(op, new Rectangle(getWidth(), getHeight()));
+        apply(op, new Rectangle(getWidth(), getHeight()), this,0,0);
+    }
+    
+    public void apply(Matrix op, Rectangle range) {
+        apply(op, range, this,0,0);
     }
 
-    public void apply(Matrix op, Rectangle range) {
-        if(!hasBuffer()){
-            //createBuffer();
+    public void apply(Matrix op, Rectangle range, AlgoImage buffer, int offsetX, int offsetY) {
+        if(!buffer.hasBuffer()){
+            //createBuffer(); 
+            throw new RuntimeException("No buffer to take data from");
         }
         final int w = getWidth();
         final int h = getHeight();
@@ -150,7 +155,7 @@ public class AlgoImage {
                 
                 int val = 0xFFFFFFFF;
                 if(inRange(px,py)){
-                    val = getBufferData(px, py);
+                    val = buffer.getBufferData(offsetX + px, offsetY + py);
                     //setPx(px,py, 0xFFFFFFFF);
                 }
                 setPx(x, y, val);

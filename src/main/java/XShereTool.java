@@ -27,13 +27,13 @@ public class XShereTool extends AbstractMorphTool {
 
     @Override
     public String getRepresentation() {
-        return "x-✂";
+        return "X-Shere";
     }
 
     @Override
     public List<ToolOption> getToolOptions() {
         return Arrays.asList(
-            ToolOption.of("x-✂", (ctrl) -> ctrl.activateTool(this))
+            ToolOption.of(getRepresentation(), (ctrl) -> ctrl.activateTool(this))
         );
     }
 
@@ -65,7 +65,7 @@ public class XShereTool extends AbstractMorphTool {
 
     @Override
     public void initNavigationBarContext(QuickNavigationBar bar) {
-        bar.addNavEntry("Morph", "x-✂" , (ctrl) -> {
+        bar.addNavEntry("Morph", getRepresentation() , (ctrl) -> {
             ctrl.activateTool(this);
         });
     }

@@ -39,7 +39,7 @@ public class RotateTool extends AbstractMorphTool {
 
     @Override
     public String getRepresentation() {
-        return "🗘";
+        return "Rotate";
     }
 
     @Override
@@ -75,7 +75,7 @@ public class RotateTool extends AbstractMorphTool {
 
     @Override
     public void initNavigationBarContext(QuickNavigationBar bar) {
-        bar.addNavEntry("Morph", "🗘" , (ctrl) -> {
+        bar.addNavEntry("Morph", getRepresentation() , (ctrl) -> {
             ctrl.activateTool(this);
         });
     }

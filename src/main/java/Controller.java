@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -72,7 +73,7 @@ public class Controller {
         m_StartUpListener.clear();
         m_StartUpListener = null;
         listeners.forEach( l -> l.onStartUp(this));
-        m_CurrentTool.onInit(this, null);
+        m_CurrentTool.onInit(this, m_CurrentImage);
         listeners.clear();
 
         SwingUtilities.invokeLater( () -> {
@@ -241,8 +242,8 @@ public class Controller {
         m_ImageOperations = op;
     }
 
-    public void applyOperations(){
-        final AlgoImage target = m_CurrentImage;
+    public void applyOperationsTo(AlgoImage image){
+        final AlgoImage target = image;
         Rectangle rect = m_ImageSelection;
         if(rect == null){
             rect = new Rectangle(target.getWidth(), target.getHeight());
@@ -264,5 +265,25 @@ public class Controller {
         } catch(IOException e) {
             
         }
+    }
+    
+    public void reduceCurrentImage(int cut) {
+        ColorAnalyser analsyer = new ColorAnalyser(m_CurrentImage);
+        Map<Integer, Integer> values = analsyer.substitution2(cut);
+        
+        if(m_CurrentImage.hasBuffer()){
+            m_CurrentImage.resetToBuffer();
+        }
+        m_CurrentImage.createBuffer();
+        
+        for(int i = 0; i < m_CurrentImage.raw().length; ++i){
+            final int color = m_CurrentImage.get(i);
+            if(!values.containsKey(color)) {
+                System.err.print("missing color entry");
+                continue;
+            }
+            m_CurrentImage.set(i, values.get(color));
+        }
+        m_CurrentImage.update();
     }
 }

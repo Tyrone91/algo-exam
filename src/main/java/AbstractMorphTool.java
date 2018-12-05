@@ -33,7 +33,7 @@ public abstract class AbstractMorphTool implements ImageTool {
         }
         target().apply( Matrix.mult(former, op), range);
 
-        if(drawSelection && rect != null) {
+        if(drawSelection && rect != null && target().inRange(range.x, range.y) && target().inRange(range.x + range.width, range.y + range.height)) {
             Bresenham.selection(target(),range);
         }
         target().update();
@@ -49,7 +49,8 @@ public abstract class AbstractMorphTool implements ImageTool {
 
     @Override
     public void onImageChange(AlgoImage newImage) {
-        controller().applyOperations();
+        System.out.println("Image change happend");
+        controller().applyOperationsTo(target());
         m_TargetImage = newImage;
         if( target().hasBuffer() ){
             target().resetToBuffer();
