@@ -14,6 +14,9 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
@@ -41,6 +44,7 @@ public class MainFrame extends JFrame implements Controller.StartUpListener {
     private UIAlgoImage m_CenterImage;
     private QuickNavigationBar m_NavBar;
     private JComponent m_SouthBar;
+    private Set<JComponent> m_PreviousDisabled = new HashSet<>();
 
     public MainFrame(Controller controller){
         super("ALGO: Assignment 1.0");
@@ -58,6 +62,38 @@ public class MainFrame extends JFrame implements Controller.StartUpListener {
             }
         });
           
+    }
+    
+    private void traverseComponents(JComponent root, Consumer<JComponent> consumer) {
+        for(int i = 0; i < root.getComponentCount(); ++i) {
+            Object obj = root.getComponent(i);
+            if( obj instanceof JComponent) {
+                JComponent c = (JComponent)(obj);
+                consumer.accept(c);
+                traverseComponents(c, consumer);
+            }
+        }
+    }
+    
+    public void disableInput() {
+        synchronized (getContentPane().getTreeLock()) {
+            traverseComponents((JComponent)getContentPane(),  c -> {
+                if(!c.isEnabled()) {
+                    m_PreviousDisabled.add(c);
+                }
+                c.setEnabled(false);
+            });
+        }
+    }
+    
+    public void enableInput() {
+        synchronized (getContentPane().getTreeLock()) {
+            traverseComponents((JComponent)getContentPane(),  c -> {
+                if(!m_PreviousDisabled.remove(c)) {                    
+                    c.setEnabled(true);
+                }
+            });
+        }
     }
 
     @Override
@@ -79,10 +115,9 @@ public class MainFrame extends JFrame implements Controller.StartUpListener {
         
         final JPanel westPanel = new JPanel(new BorderLayout());
         
-        final JSlider slider = new JSlider(JSlider.VERTICAL, 5, 100, 100);
+        final JSlider slider = new JSlider(JSlider.VERTICAL, 0, 100, 100);
         slider.setMajorTickSpacing(25);
         slider.setMinorTickSpacing(5);
-        slider.setSnapToTicks(true);
         slider.setPaintLabels(true);
         slider.setPaintTicks(true);
         
@@ -253,10 +288,6 @@ public class MainFrame extends JFrame implements Controller.StartUpListener {
         
         menu.add( UtilsUI.createItem("Analyse Image", () -> {
             m_Controller.analyseCurrentImage();
-        }));
-        
-        menu.add( UtilsUI.createItem("Reduce Image", () -> {
-            m_Controller.reduceCurrentImage(1);
         }));
         
         menu.add( UtilsUI.createItem("Exit", () -> {

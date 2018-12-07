@@ -268,22 +268,28 @@ public class Controller {
     }
     
     public void reduceCurrentImage(int cut) {
-        ColorAnalyser analsyer = new ColorAnalyser(m_CurrentImage);
-        Map<Integer, Integer> values = analsyer.substitution2(cut);
-        
+        m_MainFrame.disableInput();
+        final List<String> notFound = new ArrayList<>();
         if(m_CurrentImage.hasBuffer()){
             m_CurrentImage.resetToBuffer();
         }
-        m_CurrentImage.createBuffer();
         
-        for(int i = 0; i < m_CurrentImage.raw().length; ++i){
-            final int color = m_CurrentImage.get(i);
-            if(!values.containsKey(color)) {
-                System.err.print("missing color entry");
-                continue;
+        m_CurrentImage.createBuffer();
+        new Thread(() -> {
+            ColorAnalyser analsyer = new ColorAnalyser(m_CurrentImage);
+            Map<Integer, Integer> values = analsyer.substitution2(cut);
+            
+            
+            
+            for(int i = 0; i < m_CurrentImage.raw().length; ++i){
+                final int color = m_CurrentImage.get(i);
+                
+                Integer val = values.get(color);
+                m_CurrentImage.set(i, val);
             }
-            m_CurrentImage.set(i, values.get(color));
-        }
-        m_CurrentImage.update();
+            SwingUtilities.invokeLater(m_CurrentImage::update);
+            SwingUtilities.invokeLater(m_MainFrame::enableInput);
+            System.out.println("res: " + notFound.size());
+        }).start();
     }
 }

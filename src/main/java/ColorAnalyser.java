@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -101,11 +100,11 @@ public class ColorAnalyser {
         return list;
     }
     
-    private Pair[] toArray(Pair... array) {
+    private DistanceContainer[] toArray(DistanceContainer... array) {
         return array;
     }
     
-    private Pair getDistance(ColorComperator c, int[] array, int red, int green, int blue, int color) {
+    private DistanceContainer getDistance(ColorComperator c, int[] array, int red, int green, int blue, int color) {
         double dRedL = safeDist(c.getRed(), red-1, color);
         double dRedR = safeDist(c.getRed(), red, color);
         /*
@@ -158,166 +157,23 @@ public class ColorAnalyser {
         return value >= min && value <= max;
     }
     
-    Pair pair(int index, double distance, int[] from) {
-        Pair res = new Pair();
+    DistanceContainer pair(int index, double distance, int[] from) {
+        DistanceContainer res = new DistanceContainer();
         res.index = index;
         res.distance = distance;
         res.from = from;
         return res;
     }
     
-    private static class Pair {
+    private static class DistanceContainer {
         public int index;
         public double distance;
         int[] from;
     }
     
-    @SuppressWarnings("unchecked")
-    public Map<Integer, Integer> substitution(int cut) {
-        TimeMeasurement m0 = TimeMeasurement.now("m0");
-        final List<Entry<Integer, Integer>> sortedList = sortByOccurrence(m_Image);
-        m0.stop().print();
-        
-        TimeMeasurement m1 = TimeMeasurement.now("m1");
-        int usedColorsSize = (int) (sortedList.size() * (cut/100f));
-        if(usedColorsSize == 0) {
-            usedColorsSize = 1;
-        }
-        System.out.println( usedColorsSize + " used from " + sortedList.size());
-        final int[] usedColors = Arrays.copyOf(sortedList.stream().mapToInt( e -> e.getKey()).toArray(), usedColorsSize);
-        ColorComperator c = new ColorComperator(usedColors);
-        m1.stop().print();
-        //print("used:",usedColors);
-        //print("red",c.getRed());
-        //print("green",c.getGreen());
-        //print("blue",c.getBlue());
-        
-        TimeMeasurement m2 = TimeMeasurement.now("m2 replacer:");
-        Map<Integer, Integer> replaceMap = new HashMap<>();
-        for(Map.Entry<Integer, Integer> entry : sortedList) {
-            int color = entry.getKey();
-            
-            //TimeMeasurement m3 =  TimeMeasurement.now("m3 binary search");
-            int redIndex = findIndex(c.getRed(), color, ColorUtils::getRed, ColorUtils::getGreen, ColorUtils::getBlue);
-            int greenIndex = findIndex(c.getGreen(), color, ColorUtils::getGreen, ColorUtils::getBlue, ColorUtils::getRed);
-            int blueIndex = findIndex(c.getBlue(), color, ColorUtils::getBlue, ColorUtils::getRed, ColorUtils::getGreen);
-            int replaceIndex = -1;
-            //m3.stop().print();
-            
-            if(c.getRed()[redIndex] == color && c.getGreen()[greenIndex] == color && c.getBlue()[blueIndex] == color) {
-                System.out.println("color found nothing todo");
-                replaceMap.put(color, color);
-            } else {
-                
-                //System.out.println("didn't found color now the fun begins: "  + rgb(color) + " ri:=" + redIndex + ",gi:=" + greenIndex + ",bi:=" + blueIndex);
-                Pair res = getDistance(c, usedColors, redIndex, greenIndex, blueIndex, color);
-                double d = res.distance;
-                replaceIndex = res.index;
-                //System.out.println("dist:="+d);
-                int minRed = rangeMin(color, d, ColorUtils::getRed);
-                int maxRed = rangeMax(color, d, ColorUtils::getRed);
-                
-                int minGreen = rangeMin(color, d, ColorUtils::getGreen);
-                int maxGreen = rangeMax(color, d, ColorUtils::getGreen);
-                
-                int minBlue = rangeMin(color, d, ColorUtils::getBlue);
-                int maxBlue = rangeMax(color, d, ColorUtils::getBlue);
-                
-                //System.out.printf("min(red)=%s max(red)=%s min(green)=%s max(green)=%s min(blue)=%s max(blue)=%s\n", minRed, maxRed, minGreen, maxGreen, minBlue, maxBlue);
-                /*
-                for(int i = 0; i < usedColors.length; ++i) {
-                    int red = ColorUtils.getRed(usedColors[i]);
-                    int green = ColorUtils.getGreen(usedColors[i]);
-                    int blue = ColorUtils.getBlue(usedColors[i]); 
-                    if(inrange(minRed, maxRed, red) && inrange(minGreen, maxGreen, green) && inrange(minBlue, maxBlue, blue)) {
-                        if(replaceIndex == -1) {
-                            replaceIndex = i;
-                        }
-                        double tmpD = getDistance(c, usedColors, i, i, i, color).distance;
-                        if(tmpD < d) {
-                            d = tmpD;
-                            replaceIndex = i;
-                        }
-                    }
-                }
-                */
-                //int oldWayIndex = replaceIndex;
-                
-                for(int i = minRed; i <= maxRed; ++i) {
-                    int index = findIndex(c.getRed(), i, ColorUtils::getRed, ColorUtils::getGreen, ColorUtils::getBlue);
-                    double tmpDist = dist(color, c.getRed()[index]);
-                    if(tmpDist < d) {
-                        d = tmpDist;
-                        replaceIndex = index;
-                        
-                        minRed = rangeMin(color, d, ColorUtils::getRed);
-                        maxRed = rangeMax(color, d, ColorUtils::getRed);
-                        
-                        minGreen = rangeMin(color, d, ColorUtils::getGreen);
-                        maxGreen = rangeMax(color, d, ColorUtils::getGreen);
-                        
-                        minBlue = rangeMin(color, d, ColorUtils::getBlue);
-                        maxBlue = rangeMax(color, d, ColorUtils::getBlue);
-                    }
-                }
-                
-                for(int i = minGreen; i <= maxGreen; ++i) {
-                    int index = findIndex(c.getGreen(), color, ColorUtils::getGreen, ColorUtils::getBlue, ColorUtils::getRed);
-                    double tmpDist = dist(color, c.getGreen()[index]);
-                    if(tmpDist < d) {
-                        d = tmpDist;
-                        replaceIndex = index;
-                        
-                        minRed = rangeMin(color, d, ColorUtils::getRed);
-                        maxRed = rangeMax(color, d, ColorUtils::getRed);
-                        
-                        minGreen = rangeMin(color, d, ColorUtils::getGreen);
-                        maxGreen = rangeMax(color, d, ColorUtils::getGreen);
-                        
-                        minBlue = rangeMin(color, d, ColorUtils::getBlue);
-                        maxBlue = rangeMax(color, d, ColorUtils::getBlue);
-                    }
-                }
-                
-                for(int i = minBlue; i <= maxBlue; ++i) {
-                    int index = findIndex(c.getBlue(), color, ColorUtils::getBlue, ColorUtils::getRed, ColorUtils::getGreen);
-                    double tmpDist = dist(color, c.getBlue()[index]);
-                    if(tmpDist < d) {
-                        d = tmpDist;
-                        replaceIndex = index;
-                        
-                        minRed = rangeMin(color, d, ColorUtils::getRed);
-                        maxRed = rangeMax(color, d, ColorUtils::getRed);
-                        
-                        minGreen = rangeMin(color, d, ColorUtils::getGreen);
-                        maxGreen = rangeMax(color, d, ColorUtils::getGreen);
-                        
-                        minBlue = rangeMin(color, d, ColorUtils::getBlue);
-                        maxBlue = rangeMax(color, d, ColorUtils::getBlue);
-                    }
-                }
-                
-                
-                replaceMap.put(color, usedColors[replaceIndex]);
-               
-            }
-            
-            //System.out.println("replace: " + replaceIndex);
-            
-            //System.out.println(String.format("looking for %s. red: %s green: %s. blue: %s", this.rgb(color), redIndex, greenIndex, blueIndex));
-        }
-        m2.stop().print();
-        
-        return replaceMap;
-    }
-    
-    private class DistanceContainer {
-        
-    }
-    
-    private Pair checkCloserDistance(int color, int index, int[] array, double distance, Pair oldResult) {
+    private DistanceContainer checkCloserDistance(int color, int index, int[] array, double distance, DistanceContainer oldResult) {
         int min = (index - distance) < 0 ? 0 : (int)Math.ceil(index - distance);
-        int max = ( Math.ceil(index + distance)) > array.length ? array.length -1 : (int)(Math.ceil(index + distance)); 
+        int max = Math.ceil(index + distance) >= array.length ? array.length -1 : (int)(Math.ceil(index + distance)); 
         for(int i = min; i <= max; ++i) {
             double tmpDist = dist(color, array[i]);
             if(tmpDist < distance) {
@@ -355,18 +211,17 @@ public class ColorAnalyser {
         //print("red",c.getRed());
         //print("green",c.getGreen());
         //print("blue",c.getBlue());
-        int cnt = 0;
+       
         TimeMeasurement m2 = TimeMeasurement.now("m2 replacer:");
         Map<Integer, Integer> replaceMap = new HashMap<>();
         for(Map.Entry<Integer, Integer> entry : sortedList) {
             int color = entry.getKey();
             
-            
             //TimeMeasurement m3 =  TimeMeasurement.now("m3 binary search");
             int redIndex = findIndex(c.getRed(), color, ColorUtils::getRed, ColorUtils::getGreen, ColorUtils::getBlue);
             int greenIndex = findIndex(c.getGreen(), color, ColorUtils::getGreen, ColorUtils::getBlue, ColorUtils::getRed);
             int blueIndex = findIndex(c.getBlue(), color, ColorUtils::getBlue, ColorUtils::getRed, ColorUtils::getGreen);
-            int replaceIndex = -1;
+            
             //m3.stop().print();
             
             if(c.getRed()[redIndex] == color && c.getGreen()[greenIndex] == color && c.getBlue()[blueIndex] == color) {
@@ -375,102 +230,13 @@ public class ColorAnalyser {
             } else {
                 //System.out.println("color: " + color + " and: " + replacedColors[cnt++]);
                 //System.out.println("didn't found color now the fun begins: "  + rgb(color) + " ri:=" + redIndex + ",gi:=" + greenIndex + ",bi:=" + blueIndex);
-                Pair res = getDistance(c, usedColors, redIndex, greenIndex, blueIndex, color);
-                BiFunction<Double, Integer, Integer> rangeMin = (n1,n2) -> {
-                    if(n2-n1 < 0) return 0;
-                    return (int)(Math.ceil(n2-n1));
-                };
-                BiFunction<Double, Integer, Integer> rangeMax = (n1,n2) -> {
-                    if(Math.ceil(n2+n1) >= usedColors.length) return usedColors.length -1;
-                    int result = (int)(Math.ceil(n2+n1));
-                    if(result >= usedColors.length) {
-                        throw new RuntimeException("stop me here with: " + n1 + " and " + n2 + " added: " + (n1+n2) + " max: " + usedColors.length);
-                    }
-                    return result;
-                };
-                double d = res.distance;
-                replaceIndex = res.index;
-                int[] takeFrom = res.from;
-                //System.out.println("dist:="+d);
-                int minRed = rangeMin.apply(d, redIndex);
-                int maxRed = rangeMax.apply(d, redIndex);
+                DistanceContainer res = getDistance(c, usedColors, redIndex, greenIndex, blueIndex, color);
                 
-                int minGreen = rangeMin.apply(d, greenIndex);
-                int maxGreen = rangeMax.apply(d, greenIndex);
+                res = checkCloserDistance(color, redIndex, c.getRed(), res.distance, res);
+                res = checkCloserDistance(color, greenIndex, c.getGreen(), res.distance, res);
+                res = checkCloserDistance(color, blueIndex, c.getBlue(), res.distance, res);
                 
-                int minBlue = rangeMin.apply(d, blueIndex);
-                int maxBlue = rangeMax.apply(d, blueIndex);
-                
-                //System.out.println("start dist: " + d + " with: " + rgb(usedColors[replaceIndex]));
-                //System.out.println("dist:=" + dist(color, usedColors[replaceIndex]));
-                
-                for(int i = minRed; i <= maxRed; ++i) {
-                    //System.out.println("looking for i" + i);
-                    //int index = findIndex(c.getRed(), i, ColorUtils::getRed, ColorUtils::getGreen, ColorUtils::getBlue);
-                    double tmpDist = Double.MAX_VALUE;                        
-                    try {
-                        tmpDist = dist(color, c.getRed()[i]);
-                    } catch(Exception e) {
-                        e.printStackTrace(System.err);
-                        System.err.println("length:=" + c.getRed().length + "minRed: " + minRed + "maxRed: " + maxRed);
-                        System.exit(1);
-                    }
-                    if(tmpDist < d) {
-                        d = tmpDist;
-                        replaceIndex = i;
-                        takeFrom = c.getRed();
-                        
-                        minRed = rangeMin.apply(d, redIndex);
-                        maxRed = rangeMax.apply(d, redIndex);
-                       
-                        minGreen = rangeMin.apply(d, greenIndex);
-                        maxGreen = rangeMax.apply(d, greenIndex);
-                        
-                        minBlue = rangeMin.apply(d, blueIndex);
-                        maxBlue = rangeMax.apply(d, blueIndex);
-                    }
-                }
-                
-                for(int i = minGreen; i <= maxGreen; ++i) {
-                    //int index = findIndex(c.getGreen(), color, ColorUtils::getGreen, ColorUtils::getBlue, ColorUtils::getRed);
-                    double tmpDist = dist(color, c.getGreen()[i]);
-                    if(tmpDist < d) {
-                        d = tmpDist;
-                        replaceIndex = i;
-                        takeFrom = c.getGreen();
-                        
-                        minRed = rangeMin.apply(d, redIndex);
-                        maxRed = rangeMax.apply(d, redIndex);
-                       
-                        minGreen = rangeMin.apply(d, greenIndex);
-                        maxGreen = rangeMax.apply(d, greenIndex);
-                        
-                        minBlue = rangeMin.apply(d, blueIndex);
-                        maxBlue = rangeMax.apply(d, blueIndex);
-                    }
-                }
-                
-                for(int i = minBlue; i <= maxBlue; ++i) {
-                    //int index = findIndex(c.getBlue(), color, ColorUtils::getBlue, ColorUtils::getRed, ColorUtils::getGreen);
-                    double tmpDist = dist(color, c.getBlue()[i]);
-                    if(tmpDist < d) {
-                        d = tmpDist;
-                        replaceIndex = i;
-                        takeFrom = c.getBlue();
-                        
-                        minRed = rangeMin.apply(d, redIndex);
-                        maxRed = rangeMax.apply(d, redIndex);
-                       
-                        minGreen = rangeMin.apply(d, greenIndex);
-                        maxGreen = rangeMax.apply(d, greenIndex);
-                        
-                        minBlue = rangeMin.apply(d, blueIndex);
-                        maxBlue = rangeMax.apply(d, blueIndex);
-                    }
-                }
-                
-                
-                replaceMap.put(color, takeFrom[replaceIndex]);
+                replaceMap.put(color, res.from[res.index]);
                
             }
             
@@ -479,7 +245,6 @@ public class ColorAnalyser {
             //System.out.println(String.format("looking for %s. red: %s green: %s. blue: %s", this.rgb(color), redIndex, greenIndex, blueIndex));
         }
         m2.stop().print();
-        
         return replaceMap;
     }
     

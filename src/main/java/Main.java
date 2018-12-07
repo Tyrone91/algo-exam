@@ -70,7 +70,7 @@ public class Main
         
         
         ColorAnalyser analyser = new ColorAnalyser(image);
-        analyser.substitution(10);
+        analyser.substitution2(10);
         //System.out.println(analyser.dist(rgb(255,255,240), rgb(255,255,255)));
     }
 }   
