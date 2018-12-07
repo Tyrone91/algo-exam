@@ -8,7 +8,7 @@ import java.util.function.Predicate;
 public final class Utils {
     private Utils() {}
 
-    public static final Collection<String> ALLOWED_FILES = Arrays.asList(".png", ".jpg");
+    public static final Collection<String> ALLOWED_FILES = Arrays.asList(".png", ".jpg", ".gif");
 
     public static final FileFilter IMAGE_FILTER = file -> file.isFile() && ALLOWED_FILES.stream().anyMatch( str -> file.getName().endsWith(str));
 

@@ -190,6 +190,9 @@ public class MainFrame extends JFrame implements Controller.StartUpListener {
                     int y = fixYOffset(e.getY());
                     
                     if(image.getSource().inRange(x, y)){
+                        if(controller.getCurrentTool() == null) {
+                            return;
+                        }
                         controller.getCurrentTool().onReleased(x,y );
                     }
                 }
@@ -202,6 +205,9 @@ public class MainFrame extends JFrame implements Controller.StartUpListener {
                     int y = fixYOffset(e.getY());
                     
                     if(image.getSource().inRange(x, y)){
+                        if(controller.getCurrentTool() == null) {
+                            return;
+                        }
                         controller.getCurrentTool().onPressed(x,y );
                     }
                 }
@@ -230,7 +236,10 @@ public class MainFrame extends JFrame implements Controller.StartUpListener {
                     int y = fixYOffset(e.getY());
                     //System.out.println(String.format("x:%s y:%s", e.getX(), e.getY()));
                     
-                    if(image.getSource().inRange(x, y)){                        
+                    if(image.getSource().inRange(x, y)){
+                        if(controller.getCurrentTool() == null) {
+                            return;
+                        }
                         controller.getCurrentTool().onMove(x,y );
                     }
                 }
@@ -240,13 +249,13 @@ public class MainFrame extends JFrame implements Controller.StartUpListener {
     }
     
     private int fixXOffset(int x){
-        int offset = 0;//m_CenterImage.getWidth() /2 - m_CenterImage.getSizeByScale().width / 2;
+        int offset = /*0;*/m_CenterImage.getWidth() /2 - m_CenterImage.getSizeByScale().width / 2;
         x -= offset;
         return (int)Math.round(m_CenterImage.getXScaleOfImage() * x);
     }
     
     private int fixYOffset(int y){
-        int offset = 0;//m_CenterImage.getHeight() /2 - m_CenterImage.getSizeByScale().height / 2;
+        int offset = /*0;*/m_CenterImage.getHeight() /2 - m_CenterImage.getSizeByScale().height / 2;
         y -= offset;
         return (int)Math.round(m_CenterImage.getYScaleOfImage() * y);
     }

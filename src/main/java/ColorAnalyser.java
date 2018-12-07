@@ -157,7 +157,7 @@ public class ColorAnalyser {
         return value >= min && value <= max;
     }
     
-    DistanceContainer pair(int index, double distance, int[] from) {
+    private DistanceContainer pair(int index, double distance, int[] from) {
         DistanceContainer res = new DistanceContainer();
         res.index = index;
         res.distance = distance;
@@ -180,7 +180,8 @@ public class ColorAnalyser {
                 oldResult.distance = tmpDist;
                 oldResult.from = array;
                 oldResult.index = i;
-                //TODO: reduce max.
+                distance = oldResult.distance;
+                max = Math.ceil(index + distance) >= array.length ? array.length -1 : (int)(Math.ceil(index + distance));
             }
         }
         return oldResult;

@@ -40,6 +40,7 @@ public class Controller {
 
     private Rectangle m_ImageSelection;
     private Matrix m_ImageOperations = Matrix.unit();
+    private boolean isTempReduction = false;
 
     public Controller(){
        
@@ -50,6 +51,13 @@ public class Controller {
         m_CurrentImage = new AlgoImage(400,400);
         for(int i = 0; i < m_CurrentImage.raw().length; ++i){
             m_CurrentImage.set(i, 0xFFFFFFFF);
+        }
+    }
+    
+    private void checkTempReduction() {
+        if(isTempReduction) {
+            isTempReduction = false;
+            m_CurrentImage.clearBuffer();
         }
     }
     
@@ -136,7 +144,9 @@ public class Controller {
     public void showImage(AlgoImage image){
         m_MainFrame.setCenterImage(image);
         m_CurrentImage = image;
-        m_CurrentTool.onImageChange(image);
+        if(m_CurrentTool != null) {
+            m_CurrentTool.onImageChange(image);            
+        }
         m_NewMainImageListener.forEach(l -> l.accept(image));
     }
 
@@ -171,6 +181,7 @@ public class Controller {
     }
     
     public void activateTool(ImageTool tool){
+        checkTempReduction();
         if(m_CurrentTool != null){
             m_CurrentTool.onClose(this);
         }
@@ -268,13 +279,17 @@ public class Controller {
     }
     
     public void reduceCurrentImage(int cut) {
-        m_MainFrame.disableInput();
-        final List<String> notFound = new ArrayList<>();
-        if(m_CurrentImage.hasBuffer()){
-            m_CurrentImage.resetToBuffer();
+        if(m_CurrentTool != null) {
+            m_CurrentTool.onClose(this);
+            m_CurrentTool = null;
         }
         
+        m_MainFrame.disableInput();
+        isTempReduction = true;
+        
+        applyOperationsTo(m_CurrentImage);
         m_CurrentImage.createBuffer();
+        
         new Thread(() -> {
             ColorAnalyser analsyer = new ColorAnalyser(m_CurrentImage);
             Map<Integer, Integer> values = analsyer.substitution2(cut);
@@ -287,9 +302,12 @@ public class Controller {
                 Integer val = values.get(color);
                 m_CurrentImage.set(i, val);
             }
-            SwingUtilities.invokeLater(m_CurrentImage::update);
-            SwingUtilities.invokeLater(m_MainFrame::enableInput);
-            System.out.println("res: " + notFound.size());
+            
+            SwingUtilities.invokeLater( () -> {
+                m_CurrentImage.update();
+                m_MainFrame.enableInput();
+
+            });
         }).start();
     }
 }
