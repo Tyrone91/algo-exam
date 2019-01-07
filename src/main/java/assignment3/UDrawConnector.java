@@ -13,8 +13,7 @@ import java.util.stream.Collectors;
 
 public class UDrawConnector implements Runnable {
     
-    private static final String MY_WINDOWS_PATH = "C:\\dev\\tools\\uDraw(Graph\\en\\";
-    private static final String U_DRAW_APPLICATION_PATH = "c:/dev/tools/uDraw(Graph)";
+    
     private static final int UDRAW_PORT = 2542;
     
     private Socket m_Socket;
@@ -23,10 +22,10 @@ public class UDrawConnector implements Runnable {
     private Process m_Process;
     private Queue<String> m_Messages = new LinkedList<>();
     
-    public UDrawConnector() {
+    public UDrawConnector(final String appPath) {
         try{
-            final String udrawPath = U_DRAW_APPLICATION_PATH;
-            ProcessBuilder p = new ProcessBuilder(udrawPath + "/bin/uDrawGraph.exe", "-server");
+            System.out.format("using: '%s'\n", appPath);
+            ProcessBuilder p = new ProcessBuilder(appPath, "-server");
             m_Process = p.start();
             m_Socket = new Socket("127.0.0.1", UDRAW_PORT);
             m_Output = new BufferedWriter( new OutputStreamWriter(m_Socket.getOutputStream()));
@@ -111,27 +110,4 @@ public class UDrawConnector implements Runnable {
        end();
     }
     
-    public static void main(String[] args) throws InterruptedException {
-        
-        final UDrawConnector udraw = new UDrawConnector();
-        final String graph = udraw.newGraph(
-                udraw.newNode("1"),
-                udraw.newNode("2"),
-                udraw.newNode("3")
-                );
-        
-        Queue<String> messages = new LinkedList<>();
-        
-       new Thread(udraw).start();
-       
-       
-       udraw.send("nothing");
-       udraw.send("nothing");
-       udraw.send(graph);
-    //   udraw.send("nothing");
-  //     udraw.send("nothing");
-//       udraw.send("nothing");
-       
-       
-    }
 }

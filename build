@@ -1,0 +1,2 @@
+mkdir -p bin;
+javac -sourcepath "./src/main/java/" -classpath "./src/main/" -d "bin" "./src/main/java/assignment3/Main.java"
