@@ -390,35 +390,39 @@ public class RedBlackTree<K extends Comparable<K>, T>{
         }
         
         public NodeHandler join() {
-            if(getNode().isToJoin() ) {
-                if(     
-                        getParent() == null && 
-                        getNode().hasLeft() && getNode().left().isToJoin() &&
-                        getNode().hasRight() && getNode().right().isToJoin() 
-                ){
-                    getNode().left().makeRed();
-                    getNode().right().makeRed();
+
+            if(!getNode().isToJoin() ) {
+                return this;
+            }
+            
+
+            if(     
+                    getParent() == null && 
+                    getNode().hasLeft() && getNode().left().isToJoin() &&
+                    getNode().hasRight() && getNode().right().isToJoin() 
+            ){
+                getNode().left().makeRed();
+                getNode().right().makeRed();
+                
+            } else if(getParent() != null) {
+                NodeHandler nephewHandler = getNephew();
+                if(nephewHandler.getParent().isRed() ) {
+                    nephewHandler.rotate(GRAND_PARENT);
+                    m_Nodes[GRAND_GRAND_PARENT] = getGrandParent();
+                    m_Nodes[GRAND_PARENT] = nephewHandler.getGrandParent();
+                    nephewHandler = getNephew();
+                }
+                
+                if(nephewHandler.getParent().isToJoin()) {
+                    getNode().makeRed();
+                    nephewHandler.getParent().makeRed();
+                    getParent().removeRed();
+                } else {
                     
-                } else if(getParent() != null) {
-                    NodeHandler nephewHandler = getNephew();
-                    if(nephewHandler.getParent().isRed() ) {
-                        nephewHandler.rotate(GRAND_PARENT);
-                        m_Nodes[GRAND_GRAND_PARENT] = getGrandParent();
-                        m_Nodes[GRAND_PARENT] = nephewHandler.getGrandParent();
-                        nephewHandler = getNephew();
+                    if(nephewHandler.hasNext() && nephewHandler.getNode().isRed() ) {
+                        nephewHandler.rotate(PARENT);
                     }
-                    
-                    if(nephewHandler.getParent().isToJoin()) {
-                        getNode().makeRed();
-                        nephewHandler.getParent().makeRed();
-                        getParent().removeRed();
-                    } else {
-                        
-                        if(nephewHandler.hasNext() && nephewHandler.getNode().isRed() ) {
-                            nephewHandler.rotate(PARENT);
-                        }
-                        nephewHandler.rotate(GRAND_PARENT);
-                    }
+                    nephewHandler.rotate(GRAND_PARENT);
                 }
             }
             return this;
@@ -435,40 +439,40 @@ public class RedBlackTree<K extends Comparable<K>, T>{
         
         h.addTest("simple insert", () -> {
             
-            h.classUnderTest.insert(0, "Hello");
-            h.classUnderTest.insert(1, "Juhu");
-            h.classUnderTest.insert(2, "Welt");
+            h.classUnderTest.insert(String.valueOf(0), "Hello");
+            h.classUnderTest.insert(String.valueOf(1), "Juhu");
+            h.classUnderTest.insert(String.valueOf(2), "Welt");
             
             return h.has(0) && h.has(1) && h.has(2);
         });
         
         h.addTest("simple remove", () -> {
-            h.classUnderTest.insert(0, "Hello");
-            h.classUnderTest.insert(1, "Juhu");
-            h.classUnderTest.insert(2, "Welt");
-            h.classUnderTest.insert(3, "Nicht");
+            h.classUnderTest.insert(String.valueOf(0), "Hello");
+            h.classUnderTest.insert(String.valueOf(1), "Juhu");
+            h.classUnderTest.insert(String.valueOf(2), "Welt");
+            h.classUnderTest.insert(String.valueOf(4), "Nicht");
             
             boolean first = h.has(0) && h.has(1) && h.has(2) && h.has(3);
             
-            h.classUnderTest.remove(3);
+            h.classUnderTest.remove(String.valueOf(3));
             
             boolean second = h.has(0) && h.has(1) && h.has(2) && !h.has(3);
             return first && second;
         });
         
         h.addTest("remove and add", () -> {
-            h.classUnderTest.insert(0, "Hello");
-            h.classUnderTest.insert(1, "Juhu");
-            h.classUnderTest.insert(2, "Welt");
-            h.classUnderTest.insert(3, "Nicht");
+            h.classUnderTest.insert(String.valueOf(0), "Hello");
+            h.classUnderTest.insert(String.valueOf(1), "Juhu");
+            h.classUnderTest.insert(String.valueOf(2), "Welt");
+            h.classUnderTest.insert(String.valueOf(3), "Nicht");
             
             boolean first = h.has(0) && h.has(1) && h.has(2) && h.has(3);
             
-            h.classUnderTest.remove(3);
+            h.classUnderTest.remove(String.valueOf(3));
             
             boolean second = h.has(0) && h.has(1) && h.has(2) && !h.has(3);
             
-            h.classUnderTest.insert(17, "YEAH");
+            h.classUnderTest.insert(String.valueOf(17), "YEAH");
             
             boolean third = h.has(0) && h.has(1) && h.has(2) && !h.has(3) && h.has(17);
             
@@ -480,21 +484,21 @@ public class RedBlackTree<K extends Comparable<K>, T>{
         });
         
         h.addTest("negative test", () -> {
-            h.classUnderTest.insert(0, "Hello");
-            h.classUnderTest.insert(1, "Juhu");
-            h.classUnderTest.insert(2, "Welt");
+            h.classUnderTest.insert(String.valueOf(0), "Hello");
+            h.classUnderTest.insert(String.valueOf(1), "Juhu");
+            h.classUnderTest.insert(String.valueOf(2), "Welt");
             
             return h.has(4);
         });
         
         h.addTest("print-test", () -> {
-            h.classUnderTest.insert(0, "Hello");
-            h.classUnderTest.insert(1, "Juhu");
-            h.classUnderTest.insert(2, "Welt");
-            h.classUnderTest.insert(3, "Nicht");
+            h.classUnderTest.insert(String.valueOf(0), "Hello");
+            h.classUnderTest.insert(String.valueOf(1), "Juhu");
+            h.classUnderTest.insert(String.valueOf(2), "Welt");
+            h.classUnderTest.insert(String.valueOf(3), "Nicht");
             
-            h.classUnderTest.remove(3);
-            h.classUnderTest.insert(17, "YEAH");
+            h.classUnderTest.remove(String.valueOf(3));
+            h.classUnderTest.insert(String.valueOf(17), "YEAH");
             
             h.classUnderTest.print();
             
@@ -505,11 +509,11 @@ public class RedBlackTree<K extends Comparable<K>, T>{
             
             
             for(int i = 0; i < 25; ++i) {
-                h.classUnderTest.insert(i, String.valueOf(i));
+                h.classUnderTest.insert(String.valueOf(i), String.valueOf(i));
             }
             
             for(int i = 0; i < 20; ++i) {
-                h.classUnderTest.remove(i);
+                h.classUnderTest.remove(String.valueOf(i));
             }
             
             h.classUnderTest.print();
@@ -522,7 +526,7 @@ public class RedBlackTree<K extends Comparable<K>, T>{
     
     static class RedBlackTreeTest extends TestHelper {
         
-        public RedBlackTree<Integer, String> classUnderTest;
+        public RedBlackTree<String, String> classUnderTest;
         
         public RedBlackTreeTest() {
             runBeforeTest( () -> {
@@ -530,8 +534,12 @@ public class RedBlackTree<K extends Comparable<K>, T>{
             });
         }
         
-        public boolean has(int key) {
+        public boolean has(String key) {
             return classUnderTest.has(key);
+        }
+
+        public boolean has(int key) {
+            return classUnderTest.has(String.valueOf(key));
         }
         
     }

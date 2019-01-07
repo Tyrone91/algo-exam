@@ -8,11 +8,18 @@ public class PatriciaTree {
     private static final int CHAR_SIZE = 16;
 
     private static int bitAt(String src, int pos) {
-
+        int index = pos / CHAR_SIZE;
+        char pivotChar = src.charAt(index);
+        int  bitPos = pos % CHAR_SIZE;
+        return (pivotChar & (1 << bitPos));
     }
     
     private static boolean left(char key, int bitPos) {
         return (key & (1 << bitPos)) == 0;
+    }
+
+    private static boolean left(String key, int bitPos) {
+        return bitAt(key, bitPos) == 0;
     }
     
     private Node m_Root;
@@ -21,37 +28,11 @@ public class PatriciaTree {
         // TODO Auto-generated constructor stub
     }
     
-    public boolean search(char c) {
+    public boolean search(String c) {
         return new NodeHandler(m_Root).search(c).is(c);
     }
     
-    private boolean stringwrapper(String str, Function<Character, Boolean> function) {
-        for(int i = 0; i < str.length(); ++i) {
-            char c = str.charAt(i);
-            if(!function.apply(c)) {
-                return false;
-            }
-        }
-        return true;
-    }
-    
-    public boolean search(String str) {
-        return stringwrapper(str, this::search);
-    }
-    
-    public boolean insert(String str) {
-        return stringwrapper(str, this::insert);
-    }
-    
-    public boolean remove(String str) {
-        return stringwrapper(str, this::remove);
-    }
-    
-    public boolean has(String str) {
-        return search(str);
-    }
-    
-    public boolean insert(char c) {
+    public boolean insert(String c) {
         NodeHandler handler = new NodeHandler(m_Root).search(c);
         int index =  0;
         if(!handler.hasNext()) {
@@ -76,7 +57,7 @@ public class PatriciaTree {
         
     }
     
-    public boolean remove(char c) {
+    public boolean remove(String c) {
         NodeHandler handler = new NodeHandler(m_Root).search(c);
         if(!handler.hasNext() || handler.getNode().key() != c) {
             return false;
@@ -89,17 +70,17 @@ public class PatriciaTree {
         return true;
     }
     
-    public boolean has(char c) {
+    public boolean has(String c) {
         return search(c);
     }
     
     private class Node {
         
-        private char m_Key;
+        private String m_Key;
         private int m_Position;
         private Node m_Left, m_Right;
         
-        public Node(char key, int pos, Node succesor) {
+        public Node(String key, int pos, Node succesor) {
             m_Key = key;
             m_Position =  pos;
             if(PatriciaTree.left(key,pos)) {
@@ -111,11 +92,11 @@ public class PatriciaTree {
             }
         }
         
-        public Node(char key, int pos) {
+        public Node(String key, int pos) {
             this(key, pos, null);
         }
         
-        public char key() {
+        public String key() {
             return m_Key;
         }
         
@@ -160,7 +141,7 @@ public class PatriciaTree {
             return last < getNode().position() && max > getNode().position();
         }
         
-        public NodeHandler search(char c, int maxPos) {
+        public NodeHandler search(String c, int maxPos) {
             int lastPos = -1;
             while(hasNext() && bitCheck(lastPos, maxPos)) {
                 lastPos = getNode().position();
@@ -169,7 +150,7 @@ public class PatriciaTree {
             return this;
         }
         
-        public NodeHandler search(char c) {
+        public NodeHandler search(String c) {
             return search(c, Integer.MAX_VALUE);
         }
         
@@ -197,7 +178,7 @@ public class PatriciaTree {
             }
         }
         
-        public boolean is(char c) {
+        public boolean is(String c) {
             if(!hasNext()) {
                 return false;
             }
@@ -234,25 +215,25 @@ public class PatriciaTree {
     public static void test() {
         PatriciaTest test = new PatriciaTest();
         
-        test.addTest("simple char insert", () -> {
-            test.classUnderTest.insert('a');
-            return test.classUnderTest.has('a') && !test.classUnderTest.has('b');
+        test.addTest("simple string insert", () -> {
+            test.classUnderTest.insert("a");
+            return test.classUnderTest.has("a") && !test.classUnderTest.has("b");
         });
         
         test.addTest("insert and remove char", () -> {
-            test.insert('a');
-            test.insert('b');
-            test.insert('c');
+            test.insert("a");
+            test.insert("b");
+            test.insert("c");
             
-            boolean first = test.has('a') && test.has('b') && test.has('c');
+            boolean first = test.has("a") && test.has("b") && test.has("c");
             
-            test.remove('b');
+            test.remove("b");
             
-            boolean second = test.has('a') && !test.has('b') && test.has('c');
+            boolean second = test.has("a") && !test.has("b") && test.has("c");
             
-            test.insert('d');
+            test.insert("d");
             
-            boolean third = test.has('a') && !test.has('b') && test.has('c') && test.has('d');
+            boolean third = test.has("a") && !test.has("b") && test.has("c") && test.has("d");
             
             return first && second && third;
         });
@@ -264,9 +245,9 @@ public class PatriciaTree {
         });
         
         test.addTest("string insert char compare", () -> {
-           test.insert("helo");
+           test.insert("hello");
            
-           return test.has('h') && test.has('e') &test.has('l') && test.has("lo");
+           return test.has("hello") && !test.has("helo");
         });
         
         test.runTests();
@@ -281,18 +262,7 @@ public class PatriciaTree {
                 classUnderTest = new PatriciaTree();
             });
         }
-        
-        public boolean has(char c) {
-            return classUnderTest.has(c);
-        }
-        
-        public boolean insert(char c) {
-            return classUnderTest.insert(c);
-        }
-        
-        public boolean remove(char c) {
-            return classUnderTest.remove(c);
-        }
+
         
         public boolean has(String c) {
             return classUnderTest.has(c);
