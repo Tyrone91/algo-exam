@@ -4,6 +4,12 @@ import java.lang.reflect.Array;
 import java.util.function.Function;
 
 public class PatriciaTree {
+
+    private static final int CHAR_SIZE = 16;
+
+    private static int bitAt(String src, int pos) {
+
+    }
     
     private static boolean left(char key, int bitPos) {
         return (key & (1 << bitPos)) == 0;
