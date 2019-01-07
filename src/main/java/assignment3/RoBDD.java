@@ -132,9 +132,29 @@ public class RoBDD {
     private final Function m_True = new Function(true);
     private final Function m_False = new Function(false);
     private Map<Triple, Function> m_FoundFunctions;
+    private int m_FreeIndex = 0;
+
+    private Map<String,Integer> m_NameToFunction;
+    private Map<Integer,String> m_FunctionToName;
     
     public RoBDD() {
         m_FoundFunctions = new HashMap<>();
+        m_NameToFunction = new HashMap<>();
+        m_FunctionToName = new HashMap<>();
+    }
+
+    public String nameOf(int var) {
+        return m_FunctionToName.get(var);
+    }
+
+    public int indexOf(String name) {
+        if(m_NameToFunction.containsKey(name)) {
+            return m_NameToFunction.get(name);
+        }
+        int index = m_FreeIndex++;
+        m_NameToFunction.put(name, index);
+        m_FunctionToName.put(index,name);
+        return index;
     }
     
     public Function genTrue() {
@@ -155,14 +175,36 @@ public class RoBDD {
         return former;
         
     }
+
+    Function or(Function f, Function g) { // ite(f,1,g) = f ∧ 1 ∨ 	!f ∧ g
+        return ite(f, genTrue(), g);
+    }
+
+    Function not(Function f) { // ite(f,0,1) = f ∧ 0 ∨ 	!f ∧ 1
+        return ite(f, genFalse(), genTrue());
+    }
+
+    Function and(Function f, Function g) { //  ite(f,g,0) = f ∧ g ∨ 	!f ∧ 0
+        return ite(f,g, genFalse());
+    }
+
+    Function implies(Function f, Function g) { // ite(f,g,1) = f ∧ g ∨ 	!f ∧ 1
+        return ite(f,g, genTrue()); 
+    }
+
+    Function equivalent(Function f, Function g) {
+        return ite(f,g, not(g));
+    }
     
     Function ite(Function _if, Function _then, Function _else) {
-        if(_if.istrue() ) {
+        if(_if.istrue() ) { // ite(1,g,h) = g
             return _then;
-        } else if( _if.isfalse() ) {
+        } else if( _if.isfalse() ) { // ite(0,g,h) = h
             return _else;
-        } else if( _then.istrue() && _else.isfalse()) {
+        } else if( _then.istrue() && _else.isfalse()) { // ite(f,1,0) = f
             return _if;
+        } else if(_then == _else) { // ite(f,g,g) = g
+            return _then;
         } else {
             final int var = min(_if, _then, _else);
             final Function T = ite( thenOf(_if, var), thenOf(_then, var), thenOf(_else, var));
@@ -180,4 +222,55 @@ public class RoBDD {
             return former;
         }
     }
+
+    public static void test() {
+        RoBDDTest t = new RoBDDTest();
+
+        t.addTest("simple or", () -> {
+            // a = true;
+            // b = false
+            // c = a v b
+            
+            Function x =  t.a.genVar( t.a.indexOf("x"));
+            Function y =  t.a.genVar( t.a.indexOf("y"));
+            Function z =  t.a.genVar( t.a.indexOf("z"));
+
+            Function or1 = t.a.or(x,y);
+            Function or2 = t.a.or( t.a.not(z), t.a.not(y));
+            Function f = t.a.and(or1, or2);
+
+            
+            //x.getThen(t.a.m_True);
+
+            System.out.println(t.a.nameOf(1));
+            System.out.println(t.a.indexOf("y"));
+
+            System.out.println(f.getThen(t.a.indexOf("x")).getVariable());
+            Function exspectedY = f.getThen(t.a.indexOf("x"));
+            final boolean first = exspectedY.getVariable() == t.a.indexOf("y");
+
+            Function expectedTrue = exspectedY.getElse(t.a.indexOf("y"));
+            boolean second = expectedTrue == t.a.m_True;
+
+            Function expectedZ = exspectedY.getThen(t.a.indexOf("y"));
+            boolean third = expectedZ.getVariable() == t.a.indexOf("z");
+
+            return first && second && third;
+        });
+
+        t.runTests();
+    }
+
+    static class RoBDDTest extends TestHelper {
+
+        public RoBDD a;
+
+        public RoBDDTest() {
+            this.runBeforeTest( () -> {
+                a = new RoBDD();
+            });
+        }
+    }
+
+
 }
