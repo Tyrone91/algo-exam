@@ -291,8 +291,10 @@ public class Main {
            //t.insert("dfg");
            //t.insert("Dfgdfg ");
             
-            System.out.println(t.insert("abc"));
-            System.out.println(t.insert("abc"));
+            System.out.println(t.insert("sdf"));
+            System.out.println(t.insert("asd"));
+            System.out.println(t.insert("asdf"));
+            //System.out.println(t.insert("asf"));
             
             
             return t.toUDraw().toStringUDrawCommand();

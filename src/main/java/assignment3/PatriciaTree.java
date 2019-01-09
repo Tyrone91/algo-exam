@@ -35,7 +35,7 @@ public class PatriciaTree {
     }
     
     private boolean rangetest(String key1, String key2, int pos) {
-        return key1.length() > pos && key2.length() > pos;
+        return key1.length() * CHAR_SIZE > pos && key2.length() *CHAR_SIZE > pos;
     }
     
     public boolean insert(String c) {
@@ -53,7 +53,7 @@ public class PatriciaTree {
                     ++index;
                 }
             }
-        } else if(handler.getNode().key().equals(c)) {
+        } else if(!handler.getNode().key().equals(c)) {
             while(
                     rangetest(c, handler.getNode().key(), index) &&
                     PatriciaTree.left(c,index) == PatriciaTree.left(handler.getNode().key(), index)) {
@@ -154,7 +154,7 @@ public class PatriciaTree {
         
         public NodeHandler search(String c, int maxPos) {
             int lastPos = -1;
-            while(lastPos < c.length() && hasNext() && bitCheck(lastPos, maxPos)) {
+            while(lastPos < (c.length() * CHAR_SIZE) && hasNext() && bitCheck(lastPos, maxPos)) {
                 lastPos = getNode().position();
                 down(left(c,lastPos));
             }
@@ -232,13 +232,6 @@ public class PatriciaTree {
     private assignment3.UDrawConnector.Node toUDraw(Node n, Set<String> consumed) {
         assignment3.UDrawConnector.Node me = new assignment3.UDrawConnector.Node(n.key());
         me.attr().displayname = n.key() + "[" + n.position()+"]";
-        
-        System.out.println("Bearbeite: " + n.key());
-        //System.out.println(n.right() == n.left());
-        System.out.println("left is " + (n.left() != null ? n.left().key() : "null"));
-        System.out.println("right is " + (n.right() != null ? n.right().key() : "null"));
-        
-        System.out.println("---------\n");
         
         if(consumed.contains(n.key())) {
             return me;
