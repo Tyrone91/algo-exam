@@ -3,6 +3,8 @@ package assignment3;
 import java.util.HashMap;
 import java.util.Map;
 
+import assignment3.UDrawConnector.Node;
+
 class Function {
     
     private static final int TRUE = 0x7fffffff;
@@ -221,6 +223,33 @@ public class RoBDD {
             }
             return former;
         }
+    }
+    
+    public Node toUDraw() {
+        int var = m_NameToFunction.values().stream().findFirst().get();
+        return toUDraw(m_FoundFunctions.get(Triple.of(var, genTrue(), genFalse())));
+    }
+    
+    static int please_remove_me = 0;
+    public Node toUDraw(Function f) {
+        
+        int var = f.getVariable();
+        Node me = new Node(String.valueOf(please_remove_me++)); //TODO: add node ref to UdrawConnector
+        if(f.isconstant() ){
+            me.attr().displayname = f.istrue() ? "TRUE" :  "FALSE";
+            return me;
+        }
+        
+        Node _then = toUDraw(f.getThen(var));
+        Node _else = toUDraw(f.getElse(var));
+        
+        _then.attr().edgename = "true";
+        _else.attr().edgename = "false";
+        me.addChild(_then, _else);
+        
+        me.attr().displayname = m_FunctionToName.get(var);
+        
+        return me;
     }
 
     public static void test() {

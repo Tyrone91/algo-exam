@@ -5,9 +5,13 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class UDrawConnector implements Runnable {
@@ -60,6 +64,15 @@ public class UDrawConnector implements Runnable {
         
     }
     
+    public String newNode(String id, String... nodes) {
+        
+        return String.format("l(\"%s\",n(\"%s\",%s,%s))", id, "NODE", "[]", "[]");
+    }
+    
+    public String edge(String id, String node) {
+        return "";
+    }
+    
     public String newGraph(String... nodes) {
         return String.format("graph(new([%s]))", Arrays.stream(nodes).collect(Collectors.joining(",")));
                 
@@ -97,6 +110,10 @@ public class UDrawConnector implements Runnable {
     
     public void onDisconnect(Runnable run) {
         m_OnDisconnect = run;
+    }
+    
+    public void sendClearScreen() {
+        send("menu(file(new)) ");
     }
         
     
@@ -138,6 +155,157 @@ public class UDrawConnector implements Runnable {
     @Override
     public void finalize() {
        end();
+    }
+    
+    public static class Node {
+        
+        public class Attributes {
+            
+            public String color = null;
+            public String displayname = null;
+            public String edgecolor = null;
+            public String edgename = null;
+            
+            public Attributes() {
+                
+            }
+            
+            @Override
+            public String toString() {
+                StringBuilder b = new StringBuilder();
+                b.append("[");
+                
+                if(color != null) {
+                    b.append(set("COLOR", color));
+                }
+                
+                if(displayname != null) {
+                    b.append(set("OBJECT", displayname));
+                }
+                
+                int comma = b.lastIndexOf(",");
+                if(comma == -1) {
+                    b.append("]");
+                    return b.toString();
+                }
+                
+                return b.substring(0, comma) + "]";
+                
+            }
+            
+            public String edgeattr() {
+                StringBuilder b = new StringBuilder();
+                b.append("[");
+                
+                if(edgecolor != null) {
+                    b.append(set("EDGECOLOR", edgecolor));
+                }
+                
+                if(edgename != null) {
+                    b.append(set("OBJECT", edgename));
+                }
+                
+                int comma = b.lastIndexOf(",");
+                if(comma == -1) {
+                    b.append("]");
+                    return b.toString();
+                }
+                
+                return b.substring(0, comma) + "]";
+            }
+            
+            private String set(String key, String val) {
+                return String.format("a(\"%s\",\"%s\"),", key,val);
+            }
+        }
+        
+        private List<Node> m_Children;
+        private String m_NodeID;
+        private Attributes m_Attributes = new Attributes();
+        private Node m_Root = null;
+        private Set<String> m_VisitedNodes = new HashSet<>();
+        
+        public Node(String id) {
+            m_NodeID = id;
+            m_Children = new ArrayList<>();
+        }
+        
+        public boolean isRoot() {
+            return m_Root == null;
+        }
+        
+        public Node root() {
+            if(isRoot()) {
+                return this;
+            }
+            return m_Root;
+        }
+        
+        private void setRoot(Node n) {
+            m_Root = n;
+            m_Children.forEach( c -> c.setRoot(n));
+        }
+        
+        public Node addChild(Node...nodes) {
+            Arrays.stream(nodes).forEach(m_Children::add);
+            Arrays.stream(nodes).forEach( n -> n.setRoot(root()));
+            
+            return this;
+        }
+        
+        public Attributes attr() {
+            return m_Attributes;
+        }
+        
+        private String id() {
+            return this.m_NodeID;
+        }
+        
+        private List<Node> children() {
+            return m_Children;
+        }
+        
+        private boolean isLeaf() {
+            return children().isEmpty();
+        }
+        
+        @Override
+        public String toString() {
+            if(isRoot() ) {                
+                m_VisitedNodes.clear();
+                m_VisitedNodes.add(id());
+            }
+            
+            if(isLeaf()) {
+                return emptyNode(this);
+            }
+            
+            String children = children().stream().map( n -> n.toString(id())).collect(Collectors.joining(","));
+            
+            String attr = m_Attributes.toString();
+            
+            return String.format("l(\"%s\",n(\"%s\",%s, [%s]))", id(), "NODE", attr, children);
+        }
+        
+        public String toString(String parentId) {
+            if(root().m_VisitedNodes.contains(id()) ) {
+                return String.format("r(\"%s\")", id());
+            }
+            root().m_VisitedNodes.add(id());
+            return String.format("l(\"%s\",e(\"EDGE\",%s,%s))", edgeid(parentId, this), m_Attributes.edgeattr() ,this.toString());
+        }
+        
+        public String toStringUDrawCommand() {
+            return String.format("graph(new([%s]))", this.toString());
+        }
+    }
+    
+    private static String emptyNode(Node n) {
+        return String.format("l(\"%s\",n(\"%s\",%s,%s))", n.id(), "NODE", n.m_Attributes.toString(), "[]");
+    }
+    
+    private static String edgeid(String parent, Node child) {
+        return "edge_" + parent + "_" + child.id();
     }
     
 }

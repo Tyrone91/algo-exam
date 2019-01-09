@@ -524,6 +524,29 @@ public class RedBlackTree<K extends Comparable<K>, T>{
         h.runTests();
     }
     
+    public assignment3.UDrawConnector.Node toUDraw() {
+        if(m_Root == null) {
+            return null;
+        }
+        return toUDraw(m_Root);
+    }
+    
+    private assignment3.UDrawConnector.Node toUDraw(Node n) {
+        
+        final assignment3.UDrawConnector.Node me = new assignment3.UDrawConnector.Node(n.key().toString());
+        me.attr().displayname = n.key().toString() + " = " + n.data().toString();
+        me.attr().edgecolor = n.isRed() ? "#e20000" : "#000000";
+        if(n.hasLeft()) {
+            me.addChild(toUDraw(n.left()));
+        }
+        
+        if(n.hasRight()) {
+            me.addChild(toUDraw(n.right()));
+        }
+        
+        return me;
+    }
+    
     static class RedBlackTreeTest extends TestHelper {
         
         public RedBlackTree<String, String> classUnderTest;
