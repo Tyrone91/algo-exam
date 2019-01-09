@@ -104,7 +104,14 @@ public class Main {
                 );
         
         u.send(graph);
-        ControlWindow w  = new ControlWindow(u, new DebugGraph1(), new DebugGraph2(), new DebugGraphRedBlack(), new DebugGraphRoBDD());
+        ControlWindow w  = new ControlWindow(u,
+                new DebugGraph1(),
+                new DebugGraph2(),
+                new DebugGraphRedBlack(),
+                new DebugGraphRoBDD(),
+                new DebugGraphReference(),
+                new DebugGraphPatricia()
+                );
         
         
         System.out.println("program over");
@@ -215,7 +222,68 @@ public class Main {
             Function or2 = t.or( t.not(z), t.not(y));
             Function f = t.and(or1, or2);
             
-            return t.toUDraw(f).toStringUDrawCommand();
+            return t.toUDraw(f, true).toStringUDrawCommand();
+        }
+
+        @Override
+        public void onActivation(UDrawConnector c, JPanel container) {
+            c.sendClearScreen();
+        }
+        
+    }
+    
+    static class DebugGraphReference implements GraphSupplier {
+        
+        
+        
+        @Override
+        public String toString() {
+            return this.getClass().getSimpleName();
+        }
+
+        @Override
+        public String getGraphAsString(UDrawConnector connector) {
+            Node root = new Node("root");
+            
+            Node x1 = new Node("x");
+            Node y1 = new Node("x");
+            
+            root.addChild(x1);
+            x1.addChild(y1);
+            
+            return root.toStringUDrawCommand();
+        }
+
+        @Override
+        public void onActivation(UDrawConnector c, JPanel container) {
+            c.sendClearScreen();
+        }
+        
+    }
+    
+    static class DebugGraphPatricia implements GraphSupplier {
+        
+        
+        
+        @Override
+        public String toString() {
+            return this.getClass().getSimpleName();
+        }
+
+        @Override
+        public String getGraphAsString(UDrawConnector connector) {
+            PatriciaTree t = new PatriciaTree();
+            
+            t.insert("S");
+            t.insert("H");
+            t.insert("X");
+            
+            t.insert("P");
+            t.insert("R");
+            t.insert("T");
+            
+            
+            return t.toUDraw().toStringUDrawCommand();
         }
 
         @Override

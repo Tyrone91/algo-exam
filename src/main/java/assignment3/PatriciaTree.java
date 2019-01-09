@@ -1,7 +1,8 @@
 package assignment3;
 
 import java.lang.reflect.Array;
-import java.util.function.Function;
+import java.util.HashSet;
+import java.util.Set;
 
 public class PatriciaTree {
 
@@ -206,6 +207,45 @@ public class PatriciaTree {
             m_Nodes[kind] = n;
             return this;
         }
+    }
+    
+    public assignment3.UDrawConnector.Node toUDraw() {
+        if(m_Root == null ) {
+            return null;
+        }
+        return toUDraw(m_Root, new HashSet<>());
+    }
+    
+    private assignment3.UDrawConnector.Node toUDraw(Node n, Set<String> consumed) {
+        assignment3.UDrawConnector.Node me = new assignment3.UDrawConnector.Node(n.key());
+        me.attr().displayname = n.key();
+        
+        System.out.println("Bearbeite: " + n.key());
+        //System.out.println(n.right() == n.left());
+        System.out.println("left is " + (n.left() != null ? n.left().key() : "null"));
+        System.out.println("right is " + (n.right() != null ? n.right().key() : "null"));
+        
+        System.out.println("---------\n");
+        
+        if(consumed.contains(n.key())) {
+            return me;
+        }
+        consumed.add(n.key());
+        
+        if(n.left() != null) {
+            assignment3.UDrawConnector.Node l = toUDraw(n.left(), consumed);
+            l.attr().edgename = "0";
+            me.addChild(l);
+        }
+        
+        if(n.right() != null) {
+            assignment3.UDrawConnector.Node r = toUDraw(n.right(), consumed);
+            r.attr().edgename = "1";
+            me.addChild(r);
+        }
+        
+        
+        return me;
     }
     
     public static void main(String[] args) {

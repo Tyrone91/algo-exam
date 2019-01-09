@@ -227,21 +227,25 @@ public class RoBDD {
     
     public Node toUDraw() {
         int var = m_NameToFunction.values().stream().findFirst().get();
-        return toUDraw(m_FoundFunctions.get(Triple.of(var, genTrue(), genFalse())));
+        return toUDraw(m_FoundFunctions.get(Triple.of(var, genTrue(), genFalse())), true);
     }
     
     static int please_remove_me = 0;
-    public Node toUDraw(Function f) {
+    public Node toUDraw(Function f, boolean isTrue) {
         
         int var = f.getVariable();
-        Node me = new Node(String.valueOf(please_remove_me++)); //TODO: add node ref to UdrawConnector
+        String postfix = isTrue ? "_true" : "_false";
+        if(f.isconstant()) {
+            postfix = "";
+        }
+        Node me = new Node(String.valueOf(var) + postfix); //TODO: add node ref to UdrawConnector
         if(f.isconstant() ){
             me.attr().displayname = f.istrue() ? "TRUE" :  "FALSE";
             return me;
         }
         
-        Node _then = toUDraw(f.getThen(var));
-        Node _else = toUDraw(f.getElse(var));
+        Node _then = toUDraw(f.getThen(var), true);
+        Node _else = toUDraw(f.getElse(var), false);
         
         _then.attr().edgename = "true";
         _else.attr().edgename = "false";

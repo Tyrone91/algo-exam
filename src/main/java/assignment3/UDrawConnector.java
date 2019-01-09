@@ -289,7 +289,9 @@ public class UDrawConnector implements Runnable {
         
         public String toString(String parentId) {
             if(root().m_VisitedNodes.contains(id()) ) {
-                return String.format("r(\"%s\")", id());
+                //return String.format("r(\"%s\")", id());
+                final String ref = String.format("r(\"%s\")", id());
+                return String.format("l(\"%s\",e(\"EDGE\",%s,%s))", edgeid(parentId, this), m_Attributes.edgeattr() , ref);
             }
             root().m_VisitedNodes.add(id());
             return String.format("l(\"%s\",e(\"EDGE\",%s,%s))", edgeid(parentId, this), m_Attributes.edgeattr() ,this.toString());
