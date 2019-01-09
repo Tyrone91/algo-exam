@@ -110,7 +110,8 @@ public class Main {
                 new DebugGraphRedBlack(),
                 new DebugGraphRoBDD(),
                 new DebugGraphReference(),
-                new DebugGraphPatricia()
+                new DebugGraphPatricia(),
+                new DebugGraphPatriciaRandom()
                 );
         
         
@@ -273,7 +274,7 @@ public class Main {
         @Override
         public String getGraphAsString(UDrawConnector connector) {
             PatriciaTree t = new PatriciaTree();
-            
+            /*
             t.insert("S");
             t.insert("H");
             t.insert("X");
@@ -281,7 +282,63 @@ public class Main {
             t.insert("P");
             t.insert("R");
             t.insert("T");
+            */
             
+            //t.insert("asd");
+            //t.insert("asdf");
+            
+           //t.insert("Dfgdfg");
+           //t.insert("dfg");
+           //t.insert("Dfgdfg ");
+            
+            System.out.println(t.insert("abc"));
+            System.out.println(t.insert("abc"));
+            
+            
+            return t.toUDraw().toStringUDrawCommand();
+        }
+
+        @Override
+        public void onActivation(UDrawConnector c, JPanel container) {
+            c.sendClearScreen();
+        }
+        
+    }
+    
+    static class DebugGraphPatriciaRandom implements GraphSupplier {
+        
+        
+        
+        @Override
+        public String toString() {
+            return this.getClass().getSimpleName();
+        }
+
+        @Override
+        public String getGraphAsString(UDrawConnector connector) {
+            char[] abc = new char[26 * 2];
+            for(int i = 0; i < abc.length / 2; ++i) {
+                abc[i] = (char)('a' + i);
+            }
+            
+            for(int i = 0; i < abc.length / 2; ++i) {
+                abc[i + abc.length/2] = (char)('A' + i);
+            }
+            
+            PatriciaTree t = new PatriciaTree();
+            
+            int MAX_INSERTS = 30;
+            int MIN_WORD = 2;
+            int MAX_WORD = 8;
+            for(int i = 0; i <= MAX_INSERTS; ++i) {
+                StringBuilder word = new StringBuilder();
+                int length = (int)(Math.random() * (MAX_WORD - MIN_WORD)) + MIN_WORD;
+                for(int j = 0; j <= length; ++j) {
+                    int index = (int)(Math.random() * abc.length);
+                    word.append(abc[index]);
+                }
+                t.insert(word.toString());
+            }
             
             return t.toUDraw().toStringUDrawCommand();
         }

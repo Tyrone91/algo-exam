@@ -10,6 +10,7 @@ public class PatriciaTree {
 
     private static int bitAt(String src, int pos) {
         int index = pos / CHAR_SIZE;
+        System.out.println("index: " + pos);
         char pivotChar = src.charAt(index);
         int  bitPos = pos % CHAR_SIZE;
         return (pivotChar & (1 << bitPos));
@@ -33,20 +34,29 @@ public class PatriciaTree {
         return new NodeHandler(m_Root).search(c).is(c);
     }
     
+    private boolean rangetest(String key1, String key2, int pos) {
+        return key1.length() > pos && key2.length() > pos;
+    }
+    
     public boolean insert(String c) {
         NodeHandler handler = new NodeHandler(m_Root).search(c);
         int index =  0;
         if(!handler.hasNext()) {
             if(handler.getParent() != null) {
-                while( PatriciaTree.left(c, index) == PatriciaTree.left(handler.getParent().key(), index) && index < handler.getParent().position() ) {
+                while( 
+                        rangetest(c, handler.getParent().key(), index) &&
+                        index < handler.getParent().position() &&
+                        PatriciaTree.left(c, index) == PatriciaTree.left(handler.getParent().key(), index) ) {
                     ++index;
                 }
                 if(index == handler.getParent().position()) {
                     ++index;
                 }
             }
-        } else if(handler.getNode().key() != c) {
-            while(PatriciaTree.left(c,index) == PatriciaTree.left(handler.getNode().key(), index) ) {
+        } else if(handler.getNode().key().equals(c)) {
+            while(
+                    rangetest(c, handler.getNode().key(), index) &&
+                    PatriciaTree.left(c,index) == PatriciaTree.left(handler.getNode().key(), index)) {
                 ++index;
             }
         } else {
@@ -144,7 +154,7 @@ public class PatriciaTree {
         
         public NodeHandler search(String c, int maxPos) {
             int lastPos = -1;
-            while(hasNext() && bitCheck(lastPos, maxPos)) {
+            while(lastPos < c.length() && hasNext() && bitCheck(lastPos, maxPos)) {
                 lastPos = getNode().position();
                 down(left(c,lastPos));
             }
@@ -175,6 +185,9 @@ public class PatriciaTree {
             if(node(kind) != null) {
                 return node(kind + 1).left() == node(kind); 
             } else {
+                if(n.key().length() <= node(kind+1).position() ) {
+                    return false;
+                }
                 return PatriciaTree.left(n.key(),  node(kind+1).position() );
             }
         }
@@ -218,7 +231,7 @@ public class PatriciaTree {
     
     private assignment3.UDrawConnector.Node toUDraw(Node n, Set<String> consumed) {
         assignment3.UDrawConnector.Node me = new assignment3.UDrawConnector.Node(n.key());
-        me.attr().displayname = n.key();
+        me.attr().displayname = n.key() + "[" + n.position()+"]";
         
         System.out.println("Bearbeite: " + n.key());
         //System.out.println(n.right() == n.left());
