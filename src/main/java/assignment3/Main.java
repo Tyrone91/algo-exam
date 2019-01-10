@@ -2,6 +2,8 @@ package assignment3;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.Arrays;
@@ -10,9 +12,16 @@ import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
 
-import assignment3.UDrawConnector.Node;
+import BoolExprParser.BoolExprParser;
+import BoolExprParser.BoolExprScanner;
+import BoolExprParser.Node;
+import assignment3.UDrawConnector.GraphNode;
 
 public class Main {
 
@@ -111,7 +120,9 @@ public class Main {
                 new DebugGraphRoBDD(),
                 new DebugGraphReference(),
                 new DebugGraphPatricia(),
-                new DebugGraphPatriciaRandom()
+                new DebugGraphPatriciaRandom(),
+                new GraphPatricia(),
+                new RoBDDGraph()
                 );
         
         
@@ -152,12 +163,12 @@ public class Main {
 
         @Override
         public String getGraphAsString(UDrawConnector connector) {
-            UDrawConnector.Node root = new Node("root");
+            UDrawConnector.GraphNode root = new GraphNode("root");
             
-            Node left = new Node("left");
-            Node right = new Node("right");
+            GraphNode left = new GraphNode("left");
+            GraphNode right = new GraphNode("right");
             
-            Node grandChild = new Node("grandchild");
+            GraphNode grandChild = new GraphNode("grandchild");
             
             root.addChild(left.addChild(grandChild), right);
             
@@ -244,10 +255,10 @@ public class Main {
 
         @Override
         public String getGraphAsString(UDrawConnector connector) {
-            Node root = new Node("root");
+            GraphNode root = new GraphNode("root");
             
-            Node x1 = new Node("x");
-            Node y1 = new Node("x");
+            GraphNode x1 = new GraphNode("x");
+            GraphNode y1 = new GraphNode("x");
             
             root.addChild(x1);
             x1.addChild(y1);
@@ -274,7 +285,7 @@ public class Main {
         @Override
         public String getGraphAsString(UDrawConnector connector) {
             PatriciaTree t = new PatriciaTree();
-            /*
+
             t.insert("S");
             t.insert("H");
             t.insert("X");
@@ -282,21 +293,7 @@ public class Main {
             t.insert("P");
             t.insert("R");
             t.insert("T");
-            */
-            
-            //t.insert("asd");
-            //t.insert("asdf");
-            
-           //t.insert("Dfgdfg");
-           //t.insert("dfg");
-           //t.insert("Dfgdfg ");
-            
-            System.out.println(t.insert("sdf"));
-            System.out.println(t.insert("asd"));
-            System.out.println(t.insert("asdf"));
-            //System.out.println(t.insert("asf"));
-            
-            
+                        
             return t.toUDraw().toStringUDrawCommand();
         }
 
@@ -351,5 +348,197 @@ public class Main {
         }
         
     }
+    
+    static class GraphPatricia implements GraphSupplier {
+        
+        private PatriciaTree m_Tree;
+        
+        @Override
+        public String toString() {
+            return this.getClass().getSimpleName();
+        }
+
+        @Override
+        public String getGraphAsString(UDrawConnector connector) {
+            GraphNode udraw = m_Tree.toUDraw();
+            if(udraw == null) {
+                return "nothing";
+            }
+            return udraw.toStringUDrawCommand();
+            
+            /*
+            m_Tree.insert("gh");
+            m_Tree.insert("ghgh");
+            m_Tree.insert("ghghh");
+            m_Tree.insert("ghghhhh");
+            
+            m_Tree.remove("ghghh");
+            */
+            
+            /*
+            m_Tree.insert("f");
+            m_Tree.insert("b");
+            m_Tree.insert("j");
+            m_Tree.insert("h");
+            //m_Tree.remove("ghghhhh");
+            
+            return m_Tree.toUDraw().toStringUDrawCommand();*/
+        }
+
+        @Override
+        public void onActivation(UDrawConnector c, JPanel container) {
+            m_Tree = new PatriciaTree();
+            c.sendClearScreen();
+            
+            container.setLayout(new GridLayout(0, 1));
+            JPanel wrapper = new JPanel(new GridLayout(0, 1));
+            
+            JTextField keyInput = new JTextField();
+            JButton insertBttn = new JButton("OK");
+            
+            JPanel controlPanel = new JPanel(new GridLayout(1, 2));
+            controlPanel.add(keyInput);
+            controlPanel.add(insertBttn);
+            
+            insertBttn.setEnabled(false);
+            insertBttn.addActionListener(e -> {
+                wrapper.remove(controlPanel);
+                insertKey(keyInput.getText(), wrapper);
+                wrapper.add(controlPanel);
+                container.validate();
+                keyInput.setText("");
+                insertBttn.setEnabled(false);
+            });
+            
+            keyInput.addKeyListener( new KeyAdapter() {
+                @Override
+                public void keyReleased(KeyEvent e) {
+                    insertBttn.setEnabled(!keyInput.getText().isEmpty());
+                }
+            });
+            
+            wrapper.add(controlPanel);
+            JScrollPane pane = new JScrollPane(wrapper);
+            pane.setVerticalScrollBarPolicy( JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+            
+            container.add(pane);
+            container.validate();
+        }
+        
+        private void insertKey(String key, JPanel target) {
+            JLabel keyLabel = new JLabel(key);
+            JButton removeBttn = new JButton("X");
+            
+            JPanel con = new JPanel();
+            
+            con.add(keyLabel);
+            con.add(removeBttn);
+            
+            boolean res = m_Tree.insert(key);
+            if(!res) {
+                return;
+            }
+            
+            target.add(con);
+            removeBttn.addActionListener(e -> {
+                m_Tree.remove(key);
+                target.remove(con);
+                target.validate();
+            });
+        }    
+    }
+    
+    static class RoBDDGraph implements GraphSupplier {
+        
+        private String m_CurrentExpression;
+        private JTextArea m_Output;
+        
+        @Override
+        public String toString() {
+            return this.getClass().getSimpleName();
+        }
+
+        @Override
+        public String getGraphAsString(UDrawConnector connector) {
+            m_Output.setText("");
+            String res = "nothing";
+            try {
+                res = createTreeFrom(m_CurrentExpression);
+            } catch(Throwable e) {
+                m_Output.setText(e.toString());
+            }
+            
+            return res;
+        }
+        
+        @Override
+        public void onActivation(UDrawConnector connector, JPanel container) {
+            container.setLayout(new GridLayout(0, 1));
+            m_CurrentExpression = "";
+            m_Output = new JTextArea("");
+            m_Output.setEditable(false);
+            
+            JTextField input = new JTextField();
+            input.addKeyListener( new KeyAdapter() {
+                @Override
+                public void keyReleased(KeyEvent e) {
+                    m_CurrentExpression = input.getText();
+                }
+            });
+            container.add(input);
+            container.add(m_Output);
+            container.validate();
+        }
+        
+        private String createTreeFrom(String str) throws Exception {
+            BoolExprParser p = new BoolExprParser(new BoolExprScanner(new java.io.StringReader(str)));
+            java_cup.runtime.Symbol s = p.parse();
+            Node n = (Node)s.value;
+            
+            RoBDD t = new RoBDD();
+            Function r = eval(t,n);
+            return t.toUDraw(r, true).toStringUDrawCommand();
+        }
+        
+        private Function eval(RoBDD tree, Node n) {
+            if(n.type() == Node.Type.VAR) {
+                return tree.genVar(tree.indexOf(n.name()));
+            }
+            
+            
+            if(n.type() == Node.Type.NOT) {
+                Function left = eval(tree, n.left());
+                return tree.not(left);
+            }
+            
+            if(n.type() == Node.Type.AND) {
+                Function left = eval(tree, n.left());
+                Function right = eval(tree, n.right());
+                return tree.and(left, right);
+            }
+            
+            if(n.type() == Node.Type.OR) {
+                Function left = eval(tree, n.left());
+                Function right = eval(tree, n.right());
+                return tree.or(left, right);
+            }
+            
+            if(n.type() == Node.Type.EQUIV) {
+                Function left = eval(tree, n.left());
+                Function right = eval(tree, n.right());
+                return tree.equivalent(left, right);
+            }
+            
+            if(n.type() == Node.Type.IMPLIES) {
+                Function left = eval(tree, n.left());
+                Function right = eval(tree, n.right());
+                return tree.implies(left, right);
+            }
+            
+            System.out.println("should not happen");
+            return null;
+        }
+    }
+
 }
 

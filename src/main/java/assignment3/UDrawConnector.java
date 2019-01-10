@@ -157,7 +157,7 @@ public class UDrawConnector implements Runnable {
        end();
     }
     
-    public static class Node {
+    public static class GraphNode {
         
         public class Attributes {
             
@@ -219,13 +219,13 @@ public class UDrawConnector implements Runnable {
             }
         }
         
-        private List<Node> m_Children;
+        private List<GraphNode> m_Children;
         private String m_NodeID;
         private Attributes m_Attributes = new Attributes();
-        private Node m_Root = null;
+        private GraphNode m_Root = null;
         private Set<String> m_VisitedNodes = new HashSet<>();
         
-        public Node(String id) {
+        public GraphNode(String id) {
             m_NodeID = id;
             m_Children = new ArrayList<>();
         }
@@ -234,19 +234,19 @@ public class UDrawConnector implements Runnable {
             return m_Root == null;
         }
         
-        public Node root() {
+        public GraphNode root() {
             if(isRoot()) {
                 return this;
             }
             return m_Root;
         }
         
-        private void setRoot(Node n) {
+        private void setRoot(GraphNode n) {
             m_Root = n;
             m_Children.forEach( c -> c.setRoot(n));
         }
         
-        public Node addChild(Node...nodes) {
+        public GraphNode addChild(GraphNode...nodes) {
             Arrays.stream(nodes).forEach(m_Children::add);
             Arrays.stream(nodes).forEach( n -> n.setRoot(root()));
             
@@ -261,7 +261,7 @@ public class UDrawConnector implements Runnable {
             return this.m_NodeID;
         }
         
-        private List<Node> children() {
+        private List<GraphNode> children() {
             return m_Children;
         }
         
@@ -302,11 +302,11 @@ public class UDrawConnector implements Runnable {
         }
     }
     
-    private static String emptyNode(Node n) {
+    private static String emptyNode(GraphNode n) {
         return String.format("l(\"%s\",n(\"%s\",%s,%s))", n.id(), "NODE", n.m_Attributes.toString(), "[]");
     }
     
-    private static String edgeid(String parent, Node child) {
+    private static String edgeid(String parent, GraphNode child) {
         return "edge_" + parent + "_" + child.id();
     }
     

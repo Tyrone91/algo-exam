@@ -42,9 +42,10 @@ public class PatriciaTree {
         NodeHandler handler = new NodeHandler(m_Root).search(c);
         int index =  0;
         if(!handler.hasNext()) {
+            System.out.println("Fall 2.");
             if(handler.getParent() != null) {
                 while( 
-                        rangetest(c, handler.getParent().key(), index) &&
+                        rangetest(c, handler.getParent().key(), index+1) &&
                         index < handler.getParent().position() &&
                         PatriciaTree.left(c, index) == PatriciaTree.left(handler.getParent().key(), index) ) {
                     ++index;
@@ -54,12 +55,14 @@ public class PatriciaTree {
                 }
             }
         } else if(!handler.getNode().key().equals(c)) {
+            System.out.println("Fall 3.");
             while(
-                    rangetest(c, handler.getNode().key(), index) &&
+                    rangetest(c, handler.getNode().key(), index+1) &&
                     PatriciaTree.left(c,index) == PatriciaTree.left(handler.getNode().key(), index)) {
                 ++index;
             }
         } else {
+            System.out.println("Fall 1");
             return false;
         }
         handler = new NodeHandler(m_Root).search(c,index);
@@ -70,7 +73,8 @@ public class PatriciaTree {
     
     public boolean remove(String c) {
         NodeHandler handler = new NodeHandler(m_Root).search(c);
-        if(!handler.hasNext() || handler.getNode().key() != c) {
+        if(!handler.hasNext() || !handler.getNode().key().equals(c)) {
+            System.out.println("c:="+c+" not found has next = " + handler.hasNext() + " " + (handler.hasNext() ? handler.getNode().key() : ""));
             return false;
         } else {
             NodeHandler handler2 = new NodeHandler(handler.getParent()).search(handler.getParent().key());
@@ -155,14 +159,17 @@ public class PatriciaTree {
         public NodeHandler search(String c, int maxPos) {
             int lastPos = -1;
             while(lastPos < (c.length() * CHAR_SIZE) && hasNext() && bitCheck(lastPos, maxPos)) {
+                System.out.println("lastPos: " + lastPos);
                 lastPos = getNode().position();
+                System.out.println("lastPos: " + lastPos + " node:= " + getNode().key() );
                 down(left(c,lastPos));
             }
             return this;
         }
         
         public NodeHandler search(String c) {
-            return search(c, Integer.MAX_VALUE);
+            return search(c, c.length() * CHAR_SIZE);
+            //return search(c, Integer.MAX_VALUE);
         }
         
         public Node getNode() {
@@ -222,15 +229,15 @@ public class PatriciaTree {
         }
     }
     
-    public assignment3.UDrawConnector.Node toUDraw() {
+    public assignment3.UDrawConnector.GraphNode toUDraw() {
         if(m_Root == null ) {
             return null;
         }
         return toUDraw(m_Root, new HashSet<>());
     }
     
-    private assignment3.UDrawConnector.Node toUDraw(Node n, Set<String> consumed) {
-        assignment3.UDrawConnector.Node me = new assignment3.UDrawConnector.Node(n.key());
+    private assignment3.UDrawConnector.GraphNode toUDraw(Node n, Set<String> consumed) {
+        assignment3.UDrawConnector.GraphNode me = new assignment3.UDrawConnector.GraphNode(n.key());
         me.attr().displayname = n.key() + "[" + n.position()+"]";
         
         if(consumed.contains(n.key())) {
@@ -239,13 +246,13 @@ public class PatriciaTree {
         consumed.add(n.key());
         
         if(n.left() != null) {
-            assignment3.UDrawConnector.Node l = toUDraw(n.left(), consumed);
+            assignment3.UDrawConnector.GraphNode l = toUDraw(n.left(), consumed);
             l.attr().edgename = "0";
             me.addChild(l);
         }
         
         if(n.right() != null) {
-            assignment3.UDrawConnector.Node r = toUDraw(n.right(), consumed);
+            assignment3.UDrawConnector.GraphNode r = toUDraw(n.right(), consumed);
             r.attr().edgename = "1";
             me.addChild(r);
         }
