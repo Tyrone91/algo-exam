@@ -4,6 +4,8 @@ import java.lang.reflect.Array;
 import java.util.HashSet;
 import java.util.Set;
 
+import assignment3.UDrawConnector.GraphNodeEmptyTree;
+
 public class PatriciaTree {
 
     private static final int CHAR_SIZE = 16;
@@ -226,7 +228,7 @@ public class PatriciaTree {
     
     public assignment3.UDrawConnector.GraphNode toUDraw() {
         if(m_Root == null ) {
-            return null;
+            return new GraphNodeEmptyTree();
         }
         return toUDraw(m_Root, new HashSet<>());
     }

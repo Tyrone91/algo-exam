@@ -7,6 +7,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import assignment3.UDrawConnector.GraphNode;
+import assignment3.UDrawConnector.GraphNodeEmptyTree;
 
 class Comparison<T extends Comparable<T>> {
     
@@ -530,14 +531,14 @@ public class RedBlackTree<K extends Comparable<K>, T>{
     
     public assignment3.UDrawConnector.GraphNode toUDraw() {
         if(m_Root == null) {
-            return null;
+            return new GraphNodeEmptyTree();
         }
         return toUDraw(m_Root);
     }
     
     public GraphNode toUDrawTop234() {
         if(m_Root == null) {
-            return null;
+            return new GraphNodeEmptyTree();
         }
         return toUDrawTop234(m_Root);
     }

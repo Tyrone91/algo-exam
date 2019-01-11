@@ -306,6 +306,24 @@ public class UDrawConnector implements Runnable {
         return String.format("l(\"%s\",n(\"%s\",%s,%s))", n.id(), "NODE", n.m_Attributes.toString(), "[]");
     }
     
+    public static class GraphNodeEmptyTree extends GraphNode {
+
+        public GraphNodeEmptyTree() {
+            super("NO_TREE_SO _EMPTY");
+        }
+        
+        @Override
+        public String toString() {
+            return "[]";
+        }
+        
+        @Override
+        public String toStringUDrawCommand() {
+            return String.format("graph(new(%s))", this.toString());
+        }
+        
+    }
+    
     private static String edgeid(String parent, GraphNode child) {
         return "edge_" + parent + "_" + child.id();
     }

@@ -1,6 +1,8 @@
 package assignment3;
 
 import java.awt.BorderLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -13,6 +15,7 @@ import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -49,8 +52,10 @@ public class Main {
             m_Connector = connector;
             setTitle("UDraw Control");
             setLayout(new BorderLayout());
-            setSize(200, 600);
-            final JPanel content = new JPanel(new GridLayout(0, 1));
+            setSize(400, 350);
+            //final JPanel content = new JPanel(new GridLayout(0, 1));
+            final JPanel content = new JPanel();
+            content.setLayout(new GridBagLayout());
             
             JTextField path = new JTextField(MY_WINDOWS_PATH);
             JButton search = new JButton("Open");
@@ -71,8 +76,6 @@ public class Main {
                 path.setText(f.getAbsolutePath());
                 connector.setUDrawPath(f.getAbsolutePath());
             });
-            
-            content.add(pathContainer);
             
             JButton connectBttn = new JButton("Connect");
             connectBttn.addActionListener( e -> {
@@ -100,10 +103,45 @@ public class Main {
                 m_CurrentSupplier.onActivation(connector, graphContainer);
             });
             
-            content.add(connectBttn);
-            content.add(graphSelection);
-            content.add(graphContainer);
-            content.add(sendGraphBttn);
+            JPanel north = new JPanel( new GridBagLayout());
+            final GridBagConstraints c = new GridBagConstraints();
+            c.insets.top = 5;
+            c.insets.left = 5;
+            c.insets.bottom = 5;
+            c.fill = GridBagConstraints.BOTH;
+            c.anchor = GridBagConstraints.WEST;
+            c.weightx = 1;
+            c.gridy = 0;
+            c.gridx = 0;
+            north.add(path, c);
+            c.insets.right = 5;
+            c.insets.left = 0;
+            c.gridx++;
+            c.weightx = 0;
+            north.add(search, c);
+            
+            c.insets.top = 0;
+            c.insets.left = c.insets.right = 5;
+            c.gridwidth = 2;
+            c.weightx = 1;
+            c.gridx = 0;
+            c.gridy++;
+            north.add(connectBttn, c);
+            c.gridy++;
+            north.add(graphSelection, c);
+            //north.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+            
+            c.gridx = 0;
+            c.gridy = 0;
+            c.weighty = 0;
+            c.weightx = 1;
+            content.add(north,c );
+            c.gridy++;
+            c.weighty = 1;
+            content.add(graphContainer,c);
+            c.gridy++;
+            c.weighty = 0;
+            content.add(sendGraphBttn,c);
             
             add(content, BorderLayout.CENTER);
             
@@ -139,12 +177,12 @@ public class Main {
         
         u.send(graph);
         ControlWindow w  = new ControlWindow(u,
-                new DebugGraph1(),
-                new DebugGraph2(),
-                new DebugGraphRedBlack(),
-                new DebugGraphRoBDD(),
-                new DebugGraphReference(),
-                new DebugGraphPatricia(),
+                //new DebugGraph1(),
+                //new DebugGraph2(),
+                //new DebugGraphRedBlack(),
+                //new DebugGraphRoBDD(),
+                //new DebugGraphReference(),
+                //new DebugGraphPatricia(),
                 new DebugGraphPatriciaRandom(),
                 new GraphPatricia(),
                 new RoBDDGraph(),
@@ -388,27 +426,9 @@ public class Main {
         public String getGraphAsString(UDrawConnector connector) {
             GraphNode udraw = m_Tree.toUDraw();
             if(udraw == null) {
-                return "nothing";
+                return "graph(new([]))";
             }
             return udraw.toStringUDrawCommand();
-            
-            /*
-            m_Tree.insert("gh");
-            m_Tree.insert("ghgh");
-            m_Tree.insert("ghghh");
-            m_Tree.insert("ghghhhh");
-            
-            m_Tree.remove("ghghh");
-            */
-            
-            /*
-            m_Tree.insert("f");
-            m_Tree.insert("b");
-            m_Tree.insert("j");
-            m_Tree.insert("h");
-            //m_Tree.remove("ghghhhh");
-            
-            return m_Tree.toUDraw().toStringUDrawCommand();*/
         }
 
         @Override
@@ -417,20 +437,45 @@ public class Main {
             c.sendClearScreen();
             
             container.setLayout(new GridLayout(0, 1));
-            JPanel wrapper = new JPanel(new GridLayout(0, 1));
+            JPanel wrapper = new JPanel(new GridBagLayout());
+            final GridBagConstraints gc = new GridBagConstraints();
             
             JTextField keyInput = new JTextField();
             JButton insertBttn = new JButton("OK");
             
-            JPanel controlPanel = new JPanel(new GridLayout(1, 2));
-            controlPanel.add(keyInput);
-            controlPanel.add(insertBttn);
+            JPanel controlPanel = new JPanel( new GridBagLayout());
+            gc.gridx = 0;
+            gc.weightx = 1;
+            gc.fill = GridBagConstraints.BOTH;
+            gc.insets.left = 5;
+            controlPanel.add(keyInput,gc);
+            gc.insets.left = 0;
+            gc.insets.right = 5;
+            gc.weightx = 0;
+            gc.gridx++;
+            controlPanel.add(insertBttn,gc);
+            gc.insets.right = 0;
             
             insertBttn.setEnabled(false);
             insertBttn.addActionListener(e -> {
                 wrapper.remove(controlPanel);
-                insertKey(keyInput.getText(), wrapper);
-                wrapper.add(controlPanel);
+                
+                
+                
+                JComponent res = insertKey(keyInput.getText(), wrapper);
+                if(res != null) {
+                    gc.fill = GridBagConstraints.BOTH;
+                    gc.gridy++;
+                    gc.weightx = 1;
+                    wrapper.add(res, gc);
+                }
+                
+                gc.fill = GridBagConstraints.BOTH;
+                gc.gridy++;
+                gc.weightx = 1;
+                gc.insets.top = 5;
+                
+                wrapper.add(controlPanel,gc);
                 container.validate();
                 keyInput.setText("");
                 insertBttn.setEnabled(false);
@@ -443,7 +488,11 @@ public class Main {
                 }
             });
             
-            wrapper.add(controlPanel);
+            gc.fill = GridBagConstraints.BOTH;
+            gc.gridy++;
+            gc.gridx = 0;
+            gc.weightx = 1;
+            wrapper.add(controlPanel, gc);
             JScrollPane pane = new JScrollPane(wrapper);
             pane.setVerticalScrollBarPolicy( JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
             
@@ -451,26 +500,36 @@ public class Main {
             container.validate();
         }
         
-        private void insertKey(String key, JPanel target) {
+        private JComponent insertKey(String key, JPanel target) {
             JLabel keyLabel = new JLabel(key);
+            keyLabel.setHorizontalTextPosition(JLabel.CENTER);
+            keyLabel.setHorizontalAlignment(JLabel.CENTER);
             JButton removeBttn = new JButton("X");
             
-            JPanel con = new JPanel();
+            JPanel con = new JPanel( new GridBagLayout());
+            final GridBagConstraints c = new GridBagConstraints();
+            c.fill = GridBagConstraints.BOTH;
+            c.gridx = 0;
+            c.weightx = 1;
+            c.anchor = GridBagConstraints.CENTER;
+            con.add(keyLabel,c);
             
-            con.add(keyLabel);
-            con.add(removeBttn);
+            c.gridx++;
+            c.weightx = 0;
+            con.add(removeBttn,c);
             
             boolean res = m_Tree.insert(key);
             if(!res) {
-                return;
+                return null;
             }
             
-            target.add(con);
             removeBttn.addActionListener(e -> {
                 m_Tree.remove(key);
                 target.remove(con);
                 target.validate();
+                target.repaint();
             });
+            return con;
         }    
     }
     
@@ -591,30 +650,46 @@ public class Main {
             m_Tree = new RedBlackTree<>();
             c.sendClearScreen();
             
+            final GridBagConstraints gc = new GridBagConstraints();
             container.setLayout(new GridLayout(0, 1));
-            JPanel wrapper = new JPanel(new GridLayout(0, 1));
+            JPanel wrapper = new JPanel(new GridBagLayout());
             
             JCheckBox checkbox = new JCheckBox("Top2-3-4");
             checkbox.setSelected(asTop234);
             checkbox.addChangeListener( l -> {
                 asTop234 = checkbox.isSelected();
             });
-            wrapper.add(checkbox);
+            
             
             JTextField keyInput = new JTextField();
             JTextField labelInput = new JTextField();
             JButton insertBttn = new JButton("OK");
             
-            JPanel controlPanel = new JPanel(new GridLayout(1, 3));
-            controlPanel.add(keyInput);
-            controlPanel.add(labelInput);
-            controlPanel.add(insertBttn);
+            JPanel controlPanel = new JPanel(new GridBagLayout());
+            final GridBagConstraints gc2 = new GridBagConstraints();
+            
+            gc2.fill = GridBagConstraints.BOTH;
+            gc2.weightx = 1;
+            gc2.insets.left = 5;
+            controlPanel.add(keyInput,gc2);
+            gc2.insets.left = 0;
+            controlPanel.add(labelInput,gc2);
+            
+            gc2.insets.left = 3;
+            gc2.weightx = 0;
+            gc2.insets.right = 5;
+            controlPanel.add(insertBttn,gc2);
             
             insertBttn.setEnabled(false);
             insertBttn.addActionListener(e -> {
                 wrapper.remove(controlPanel);
-                insertKey(keyInput.getText(),labelInput.getText(), wrapper);
-                wrapper.add(controlPanel);
+                JComponent res = insertKey(keyInput.getText(),labelInput.getText(), wrapper);
+                if(res != null) {
+                    gc.gridy++;
+                    wrapper.add(res, gc);
+                }
+                gc.gridy++;
+                wrapper.add(controlPanel, gc);
                 container.validate();
                 keyInput.setText("");
                 labelInput.setText("");
@@ -628,7 +703,15 @@ public class Main {
                 }
             });
             
-            wrapper.add(controlPanel);
+            gc.fill = GridBagConstraints.BOTH;
+            gc.gridy = 0;
+            gc.gridx = 0;
+            gc.weightx = 1;
+            gc.insets.bottom = 5;
+            
+            wrapper.add(checkbox,gc);
+            gc.gridy++;
+            wrapper.add(controlPanel,gc);
             JScrollPane pane = new JScrollPane(wrapper);
             pane.setVerticalScrollBarPolicy( JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
             
@@ -636,26 +719,38 @@ public class Main {
             container.validate();
         }
         
-        private void insertKey(String key, String value, JPanel target) {
+        private JComponent insertKey(String key, String value, JPanel target) {
             JLabel keyLabel = new JLabel(key + ":" + value);
+            keyLabel.setHorizontalAlignment(JLabel.CENTER);
             JButton removeBttn = new JButton("X");
             
-            JPanel con = new JPanel();
+            JPanel con = new JPanel(new GridBagLayout());
+            final GridBagConstraints c = new GridBagConstraints();
             
-            con.add(keyLabel);
-            con.add(removeBttn);
+            c.fill = GridBagConstraints.BOTH;
+            c.weightx = 1;
+            c.weighty = 0;
+            c.gridx = 0;
+            
+            con.add(keyLabel,c);
+            
+            c.weightx = 0;
+            c.gridx++;
+            c.insets.left = c.insets.right=  5;
+            con.add(removeBttn,c);
             
             boolean res = m_Tree.insert(key,value);
             if(!res) {
-                return;
+                return null;
             }
             
-            target.add(con);
             removeBttn.addActionListener(e -> {
                 m_Tree.remove(key);
                 target.remove(con);
                 target.validate();
+                target.repaint();
             });
+            return con;
         }    
     }
 
