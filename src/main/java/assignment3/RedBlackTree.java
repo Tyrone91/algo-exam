@@ -92,8 +92,8 @@ public class RedBlackTree<K extends Comparable<K>, T>{
                 } else {
                     final NodeHandler handler2 = new NodeHandler(handler);
                     handler2.down(false);
-                    handler.join();
-                    while( handler.node(NodeHandler.NODE).hasLeft() ) {
+                    handler2.join();
+                    while( handler2.node(NodeHandler.NODE).hasLeft() ) {
                         handler2.down(true);
                         handler2.join();
                     }
@@ -395,6 +395,11 @@ public class RedBlackTree<K extends Comparable<K>, T>{
         }
         
         public NodeHandler join() {
+            
+            if(getNode() == null ) {
+                System.out.println("Wurzel Fall");
+                System.out.println(node(NodeHandler.NODE));
+            }
 
             if(!getNode().isToJoin() ) {
                 return this;
@@ -565,7 +570,9 @@ public class RedBlackTree<K extends Comparable<K>, T>{
         }
         
         GraphNode me = new GraphNode(id.stream().collect(Collectors.joining("_")));
-        me.attr().displayname = id.stream().collect(Collectors.joining(" "));
+        me.attr().displayname = id.stream()
+                .sorted()
+                .collect(Collectors.joining(" "));
         nextNodes.stream()
             .filter(Objects::nonNull)
             .map(this::toUDrawTop234)
