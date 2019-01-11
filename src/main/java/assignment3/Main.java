@@ -164,18 +164,11 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        //PatriciaTree.test();
-        //RedBlackTree.test();
-        //RoBDD.test();
+        PatriciaTree.test();
+        RedBlackTree.test();
+        RoBDD.test();
         
         UDrawConnector u = new UDrawConnector(MY_WINDOWS_PATH);
-        final String graph = u.newGraph(
-                u.newNode("1"),
-                u.newNode("2"),
-                u.newNode("3")
-                );
-        
-        u.send(graph);
         ControlWindow w  = new ControlWindow(u,
                 //new DebugGraph1(),
                 //new DebugGraph2(),
@@ -183,14 +176,11 @@ public class Main {
                 //new DebugGraphRoBDD(),
                 //new DebugGraphReference(),
                 //new DebugGraphPatricia(),
-                new DebugGraphPatriciaRandom(),
+                //new DebugGraphPatriciaRandom(),
                 new GraphPatricia(),
                 new RoBDDGraph(),
                 new GraphRedBlack()
                 );
-        
-        
-        System.out.println("program over");
     }
     
     static class DebugGraph1 implements GraphSupplier {
@@ -419,7 +409,7 @@ public class Main {
         
         @Override
         public String toString() {
-            return this.getClass().getSimpleName();
+            return "Patricia Tree";
         }
 
         @Override
@@ -540,7 +530,7 @@ public class Main {
         
         @Override
         public String toString() {
-            return this.getClass().getSimpleName();
+            return "RoBDD Tree";
         }
 
         @Override
@@ -633,7 +623,7 @@ public class Main {
         
         @Override
         public String toString() {
-            return this.getClass().getSimpleName();
+            return "Rot-Schwarz Baum";
         }
 
         @Override

@@ -38,7 +38,6 @@ public class UDrawConnector implements Runnable {
             m_Process = p.start();
             m_Socket = new Socket("127.0.0.1", UDRAW_PORT);
             m_Writer = new PrintWriter(m_Socket.getOutputStream(), true);
-            //m_Output = new BufferedWriter( new OutputStreamWriter(m_Socket.getOutputStream() ));
             m_Input = new BufferedReader(new InputStreamReader(m_Socket.getInputStream()));
             run();
         } catch(Exception e) {
@@ -85,8 +84,6 @@ public class UDrawConnector implements Runnable {
     private void send2(String msg) {
         try {
             System.out.println("sending: " + msg);
-            //m_Output.write(msg);
-            //m_Output.flush();
             m_Writer.println(msg);
         } catch (Exception e) {
             e.printStackTrace(System.err);
@@ -94,7 +91,6 @@ public class UDrawConnector implements Runnable {
     }
     
     public synchronized void send(String msg) {
-        //m_Messages.add(msg);
         if(ready) {
             send2(msg);
             ready = false;
@@ -138,7 +134,6 @@ public class UDrawConnector implements Runnable {
                             m_OnDisconnect.run();
                         }
                     }
-                    System.out.println("ending reading");
                 } catch(Exception e) {
                     System.out.println(e);
                     m_OnDisconnect.run();
@@ -309,7 +304,7 @@ public class UDrawConnector implements Runnable {
     public static class GraphNodeEmptyTree extends GraphNode {
 
         public GraphNodeEmptyTree() {
-            super("NO_TREE_SO _EMPTY");
+            super("NO_TREE_SO_EMPTY");
         }
         
         @Override

@@ -258,11 +258,7 @@ public class RoBDD {
     public static void test() {
         RoBDDTest t = new RoBDDTest();
 
-        t.addTest("simple or", () -> {
-            // a = true;
-            // b = false
-            // c = a v b
-            
+        t.addTest("simple or", () -> {            
             Function x =  t.a.genVar( t.a.indexOf("x"));
             Function y =  t.a.genVar( t.a.indexOf("y"));
             Function z =  t.a.genVar( t.a.indexOf("z"));
@@ -271,13 +267,6 @@ public class RoBDD {
             Function or2 = t.a.or( t.a.not(z), t.a.not(y));
             Function f = t.a.and(or1, or2);
 
-            
-            //x.getThen(t.a.m_True);
-
-            System.out.println(t.a.nameOf(1));
-            System.out.println(t.a.indexOf("y"));
-
-            System.out.println(f.getThen(t.a.indexOf("x")).getVariable());
             Function exspectedY = f.getThen(t.a.indexOf("x"));
             final boolean first = exspectedY.getVariable() == t.a.indexOf("y");
 

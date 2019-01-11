@@ -116,33 +116,6 @@ public class RedBlackTree<K extends Comparable<K>, T>{
         return search(key) != null;
     }
     
-    public void print() {
-        final List<List<Node>> list = new ArrayList<>();
-        printHelp(m_Root, list, 0);
-        
-        for(List<Node> row : list) {
-            for(Node n : row) {
-                System.out.print(n.key() + ": " + n.data() + " - ");
-            }
-            System.out.println();
-        }
-    }
-    
-    private void printHelp(Node parent, List<List<Node>> rows, int depth) {
-        if(parent == null) {
-            return;
-        }
-        
-        if(rows.size() <= depth ) {
-            rows.add( new ArrayList<>());
-        }
-        rows.get(depth).add(parent);
-        
-        printHelp(parent.left(), rows, depth + 1);
-        printHelp(parent.right(), rows, depth + 1);
-        
-    }
-    
     private class Node {
         
         private K m_Key;
@@ -185,11 +158,6 @@ public class RedBlackTree<K extends Comparable<K>, T>{
         }
         
         public boolean isRed() {
-            return m_Red;
-        }
-        
-        public boolean toggleRed() {
-            m_Red = !m_Red;
             return m_Red;
         }
         
@@ -259,6 +227,7 @@ public class RedBlackTree<K extends Comparable<K>, T>{
         public static final int GRAND_PARENT = 2;
         public static final int GRAND_GRAND_PARENT = 3;
         
+        @SuppressWarnings("unchecked")
         private Node[] m_Nodes = (RedBlackTree<K, T>.Node[]) Array.newInstance( Node.class, 4);
         
         public NodeHandler(Node node) {
@@ -293,10 +262,6 @@ public class RedBlackTree<K extends Comparable<K>, T>{
         
         public Node getGrandParent() {
             return node(GRAND_PARENT);
-        }
-        
-        public Node getGrandGrandParent() {
-            return node(GRAND_GRAND_PARENT);
         }
         
         public NodeHandler set(Node n, int kind, boolean copyColor) {
@@ -395,11 +360,6 @@ public class RedBlackTree<K extends Comparable<K>, T>{
         }
         
         public NodeHandler join() {
-            
-            if(getNode() == null ) {
-                System.out.println("Wurzel Fall");
-                System.out.println(node(NodeHandler.NODE));
-            }
 
             if(!getNode().isToJoin() ) {
                 return this;
@@ -462,11 +422,11 @@ public class RedBlackTree<K extends Comparable<K>, T>{
             h.classUnderTest.insert(String.valueOf(2), "Welt");
             h.classUnderTest.insert(String.valueOf(4), "Nicht");
             
-            boolean first = h.has(0) && h.has(1) && h.has(2) && h.has(3);
+            boolean first = h.has(0) && h.has(1) && h.has(2) && h.has(4);
             
-            h.classUnderTest.remove(String.valueOf(3));
+            h.classUnderTest.remove(String.valueOf(4));
             
-            boolean second = h.has(0) && h.has(1) && h.has(2) && !h.has(3);
+            boolean second = h.has(0) && h.has(1) && h.has(2) && !h.has(4);
             return first && second;
         });
         
@@ -486,49 +446,7 @@ public class RedBlackTree<K extends Comparable<K>, T>{
             
             boolean third = h.has(0) && h.has(1) && h.has(2) && !h.has(3) && h.has(17);
             
-            System.out.println("first: " + first);
-            System.out.println("second: " + second);
-            System.out.println("third: " + third);
-            
             return first && second && third;
-        });
-        
-        h.addTest("negative test", () -> {
-            h.classUnderTest.insert(String.valueOf(0), "Hello");
-            h.classUnderTest.insert(String.valueOf(1), "Juhu");
-            h.classUnderTest.insert(String.valueOf(2), "Welt");
-            
-            return h.has(4);
-        });
-        
-        h.addTest("print-test", () -> {
-            h.classUnderTest.insert(String.valueOf(0), "Hello");
-            h.classUnderTest.insert(String.valueOf(1), "Juhu");
-            h.classUnderTest.insert(String.valueOf(2), "Welt");
-            h.classUnderTest.insert(String.valueOf(3), "Nicht");
-            
-            h.classUnderTest.remove(String.valueOf(3));
-            h.classUnderTest.insert(String.valueOf(17), "YEAH");
-            
-            h.classUnderTest.print();
-            
-            return true;
-        });
-        
-        h.addTest("print-test", () -> {
-            
-            
-            for(int i = 0; i < 25; ++i) {
-                h.classUnderTest.insert(String.valueOf(i), String.valueOf(i));
-            }
-            
-            for(int i = 0; i < 20; ++i) {
-                h.classUnderTest.remove(String.valueOf(i));
-            }
-            
-            h.classUnderTest.print();
-            
-            return true;
         });
         
         h.runTests();

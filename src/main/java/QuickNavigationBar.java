@@ -5,7 +5,6 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Graphics;
-import java.awt.ScrollPane;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -21,6 +20,10 @@ import javax.swing.JScrollPane;
 
 public class QuickNavigationBar extends JComponent {
 
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
     private Map<String, NavEntry> m_Entries;
     private Controller m_Controller;
 

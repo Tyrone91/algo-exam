@@ -11,18 +11,12 @@ public class PatriciaTree {
     private static final int CHAR_SIZE = 16;
 
     private static int bitAt(String src, int pos) {
-        System.out.println(pos);
         int index = pos / CHAR_SIZE;
-        //System.out.println("index: " + pos);
         char pivotChar = src.length() > index ? src.charAt(index) : '\0';
         int  bitPos = pos % CHAR_SIZE;
         return (pivotChar & (1 << bitPos));
     }
     
-    private static boolean left(char key, int bitPos) {
-        return (key & (1 << bitPos)) == 0;
-    }
-
     private static boolean left(String key, int bitPos) {
         return bitAt(key, bitPos) == 0;
     }
@@ -30,15 +24,10 @@ public class PatriciaTree {
     private Node m_Root;
     
     public PatriciaTree() {
-        // TODO Auto-generated constructor stub
     }
     
     public boolean search(String c) {
         return new NodeHandler(m_Root).search(c).is(c);
-    }
-    
-    private boolean rangetest(String key1, String key2, int pos) {
-        return key1.length() * CHAR_SIZE > pos && key2.length() *CHAR_SIZE > pos;
     }
     
     public boolean insert(String c) {
@@ -71,7 +60,6 @@ public class PatriciaTree {
     public boolean remove(String c) {
         NodeHandler handler = new NodeHandler(m_Root).search(c);
         if(!handler.hasNext() || !handler.getNode().key().equals(c)) {
-            System.out.println("c:="+c+" not found has next = " + handler.hasNext() + " " + (handler.hasNext() ? handler.getNode().key() : ""));
             return false;
         } else {
             NodeHandler handler2 = new NodeHandler(handler.getParent()).search(handler.getParent().key());
@@ -102,10 +90,6 @@ public class PatriciaTree {
                 m_Left = succesor;
                 m_Right = this;
             }
-        }
-        
-        public Node(String key, int pos) {
-            this(key, pos, null);
         }
         
         public String key() {
@@ -156,9 +140,7 @@ public class PatriciaTree {
         public NodeHandler search(String c, int maxPos) {
             int lastPos = -1;
             while(hasNext() && bitCheck(lastPos, maxPos)) {
-                System.out.println("lastPos: " + lastPos);
                 lastPos = getNode().position();
-                System.out.println("lastPos: " + lastPos + " node:= " + getNode().key() );
                 down(left(c,lastPos));
             }
             return this;
