@@ -3,6 +3,10 @@ package assignment3;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+import assignment3.UDrawConnector.GraphNode;
 
 class Comparison<T extends Comparable<T>> {
     
@@ -529,6 +533,44 @@ public class RedBlackTree<K extends Comparable<K>, T>{
             return null;
         }
         return toUDraw(m_Root);
+    }
+    
+    public GraphNode toUDrawTop234() {
+        if(m_Root == null) {
+            return null;
+        }
+        return toUDrawTop234(m_Root);
+    }
+    
+    public GraphNode toUDrawTop234(Node n) {
+        List<String> id = new ArrayList<>();
+        List<Node> nextNodes = new ArrayList<>();
+        id.add(n.key().toString());
+        
+        if(n.leftIsRed() ) {
+            id.add(n.left().key().toString());
+            nextNodes.add(n.left().left());
+            nextNodes.add(n.left().right());
+        } else {
+            nextNodes.add(n.left());
+        }
+        
+        if(n.rightIsRed() ) {
+            id.add(n.right().key().toString());
+            nextNodes.add(n.right().left());
+            nextNodes.add(n.right().right());
+        } else {
+            nextNodes.add(n.right());
+        }
+        
+        GraphNode me = new GraphNode(id.stream().collect(Collectors.joining("_")));
+        me.attr().displayname = id.stream().collect(Collectors.joining(" "));
+        nextNodes.stream()
+            .filter(Objects::nonNull)
+            .map(this::toUDrawTop234)
+            .forEach(me::addChild);
+        
+        return me;
     }
     
     private assignment3.UDrawConnector.GraphNode toUDraw(Node n) {

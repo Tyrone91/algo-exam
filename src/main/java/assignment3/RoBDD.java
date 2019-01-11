@@ -230,7 +230,6 @@ public class RoBDD {
         return toUDraw(m_FoundFunctions.get(Triple.of(var, genTrue(), genFalse())), true);
     }
     
-    static int please_remove_me = 0;
     public GraphNode toUDraw(Function f, boolean isTrue) {
         
         int var = f.getVariable();
@@ -238,7 +237,7 @@ public class RoBDD {
         if(f.isconstant()) {
             postfix = "";
         }
-        GraphNode me = new GraphNode(String.valueOf(var) + postfix); //TODO: add node ref to UdrawConnector
+        GraphNode me = new GraphNode(String.valueOf(var) + postfix);
         if(f.isconstant() ){
             me.attr().displayname = f.istrue() ? "TRUE" :  "FALSE";
             return me;

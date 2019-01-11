@@ -6,11 +6,14 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -25,8 +28,8 @@ import assignment3.UDrawConnector.GraphNode;
 
 public class Main {
 
-    public static final String MY_LINUX_PATH = "/home/tyrone/dev/hs/algo-exam/uDrawGraph-3.1/bin/";
-    public static final String MY_WINDOWS_PATH = "c:/dev/tools/uDraw(Graph)/bin/";
+    public static final String MY_LINUX_PATH = "/home/tyrone/dev/hs/algo-exam/uDrawGraph-3.1/bin/uDrawGraph";
+    public static final String MY_WINDOWS_PATH = "c:/dev/tools/uDraw(Graph)/bin/uDrawGraph";
     
     static interface GraphSupplier {
         
@@ -46,8 +49,30 @@ public class Main {
             m_Connector = connector;
             setTitle("UDraw Control");
             setLayout(new BorderLayout());
-            setSize(200, 400);
+            setSize(200, 600);
             final JPanel content = new JPanel(new GridLayout(0, 1));
+            
+            JTextField path = new JTextField(MY_WINDOWS_PATH);
+            JButton search = new JButton("Open");
+            
+            JPanel pathContainer = new JPanel();
+            pathContainer.add(path);
+            pathContainer.add(search);
+            
+            search.addActionListener( l -> {
+                JFileChooser c = new JFileChooser(System.getProperty("user.dir"));
+                c.setFileSelectionMode(JFileChooser.FILES_ONLY);
+                c.setMultiSelectionEnabled(false);
+                c.showOpenDialog(this);
+                File f = c.getSelectedFile();
+                if(f == null) {
+                    return;
+                }
+                path.setText(f.getAbsolutePath());
+                connector.setUDrawPath(f.getAbsolutePath());
+            });
+            
+            content.add(pathContainer);
             
             JButton connectBttn = new JButton("Connect");
             connectBttn.addActionListener( e -> {
@@ -105,7 +130,7 @@ public class Main {
         //RedBlackTree.test();
         //RoBDD.test();
         
-        UDrawConnector u = new UDrawConnector(MY_WINDOWS_PATH + "uDrawGraph");
+        UDrawConnector u = new UDrawConnector(MY_WINDOWS_PATH);
         final String graph = u.newGraph(
                 u.newNode("1"),
                 u.newNode("2"),
@@ -122,7 +147,8 @@ public class Main {
                 new DebugGraphPatricia(),
                 new DebugGraphPatriciaRandom(),
                 new GraphPatricia(),
-                new RoBDDGraph()
+                new RoBDDGraph(),
+                new GraphRedBlack()
                 );
         
         
@@ -475,6 +501,7 @@ public class Main {
         public void onActivation(UDrawConnector connector, JPanel container) {
             container.setLayout(new GridLayout(0, 1));
             m_CurrentExpression = "";
+            
             m_Output = new JTextArea("");
             m_Output.setEditable(false);
             
@@ -538,6 +565,98 @@ public class Main {
             System.out.println("should not happen");
             return null;
         }
+    }
+    
+    static class GraphRedBlack implements GraphSupplier {
+        
+        private RedBlackTree<String, String> m_Tree;
+        private boolean asTop234 = false;
+        
+        @Override
+        public String toString() {
+            return this.getClass().getSimpleName();
+        }
+
+        @Override
+        public String getGraphAsString(UDrawConnector connector) {
+            GraphNode udraw =  asTop234 ? m_Tree.toUDrawTop234() : m_Tree.toUDraw();
+            if(udraw == null) {
+                return "nothing";
+            }
+            return udraw.toStringUDrawCommand();
+        }
+
+        @Override
+        public void onActivation(UDrawConnector c, JPanel container) {
+            m_Tree = new RedBlackTree<>();
+            c.sendClearScreen();
+            
+            container.setLayout(new GridLayout(0, 1));
+            JPanel wrapper = new JPanel(new GridLayout(0, 1));
+            
+            JCheckBox checkbox = new JCheckBox("Top2-3-4");
+            checkbox.setSelected(asTop234);
+            checkbox.addChangeListener( l -> {
+                asTop234 = checkbox.isSelected();
+            });
+            wrapper.add(checkbox);
+            
+            JTextField keyInput = new JTextField();
+            JTextField labelInput = new JTextField();
+            JButton insertBttn = new JButton("OK");
+            
+            JPanel controlPanel = new JPanel(new GridLayout(1, 3));
+            controlPanel.add(keyInput);
+            controlPanel.add(labelInput);
+            controlPanel.add(insertBttn);
+            
+            insertBttn.setEnabled(false);
+            insertBttn.addActionListener(e -> {
+                wrapper.remove(controlPanel);
+                insertKey(keyInput.getText(),labelInput.getText(), wrapper);
+                wrapper.add(controlPanel);
+                container.validate();
+                keyInput.setText("");
+                labelInput.setText("");
+                insertBttn.setEnabled(false);
+            });
+            
+            keyInput.addKeyListener( new KeyAdapter() {
+                @Override
+                public void keyReleased(KeyEvent e) {
+                    insertBttn.setEnabled(!keyInput.getText().isEmpty());
+                }
+            });
+            
+            wrapper.add(controlPanel);
+            JScrollPane pane = new JScrollPane(wrapper);
+            pane.setVerticalScrollBarPolicy( JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+            
+            container.add(pane);
+            container.validate();
+        }
+        
+        private void insertKey(String key, String value, JPanel target) {
+            JLabel keyLabel = new JLabel(key + ":" + value);
+            JButton removeBttn = new JButton("X");
+            
+            JPanel con = new JPanel();
+            
+            con.add(keyLabel);
+            con.add(removeBttn);
+            
+            boolean res = m_Tree.insert(key,value);
+            if(!res) {
+                return;
+            }
+            
+            target.add(con);
+            removeBttn.addActionListener(e -> {
+                m_Tree.remove(key);
+                target.remove(con);
+                target.validate();
+            });
+        }    
     }
 
 }
