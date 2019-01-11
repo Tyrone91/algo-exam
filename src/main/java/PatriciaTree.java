@@ -1,10 +1,8 @@
-package assignment3;
+
 
 import java.lang.reflect.Array;
 import java.util.HashSet;
 import java.util.Set;
-
-import assignment3.UDrawConnector.GraphNodeEmptyTree;
 
 public class PatriciaTree {
 
@@ -208,15 +206,15 @@ public class PatriciaTree {
         }
     }
     
-    public assignment3.UDrawConnector.GraphNode toUDraw() {
+    public UDrawConnector.GraphNode toUDraw() {
         if(m_Root == null ) {
-            return new GraphNodeEmptyTree();
+            return new UDrawConnector.GraphNodeEmptyTree();
         }
         return toUDraw(m_Root, new HashSet<>());
     }
     
-    private assignment3.UDrawConnector.GraphNode toUDraw(Node n, Set<String> consumed) {
-        assignment3.UDrawConnector.GraphNode me = new assignment3.UDrawConnector.GraphNode(n.key());
+    private UDrawConnector.GraphNode toUDraw(Node n, Set<String> consumed) {
+        UDrawConnector.GraphNode me = new UDrawConnector.GraphNode(n.key());
         me.attr().displayname = n.key() + "[" + n.position()+"]";
         
         if(consumed.contains(n.key())) {
@@ -225,13 +223,13 @@ public class PatriciaTree {
         consumed.add(n.key());
         
         if(n.left() != null) {
-            assignment3.UDrawConnector.GraphNode l = toUDraw(n.left(), consumed);
+            UDrawConnector.GraphNode l = toUDraw(n.left(), consumed);
             l.attr().edgename = "0";
             me.addChild(l);
         }
         
         if(n.right() != null) {
-            assignment3.UDrawConnector.GraphNode r = toUDraw(n.right(), consumed);
+            UDrawConnector.GraphNode r = toUDraw(n.right(), consumed);
             r.attr().edgename = "1";
             me.addChild(r);
         }

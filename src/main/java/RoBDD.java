@@ -1,9 +1,7 @@
-package assignment3;
+
 
 import java.util.HashMap;
 import java.util.Map;
-
-import assignment3.UDrawConnector.GraphNode;
 
 class Function {
     
@@ -225,26 +223,26 @@ public class RoBDD {
         }
     }
     
-    public GraphNode toUDraw() {
+    public UDrawConnector.GraphNode toUDraw() {
         int var = m_NameToFunction.values().stream().findFirst().get();
         return toUDraw(m_FoundFunctions.get(Triple.of(var, genTrue(), genFalse())), true);
     }
     
-    public GraphNode toUDraw(Function f, boolean isTrue) {
+    public UDrawConnector.GraphNode toUDraw(Function f, boolean isTrue) {
         
         int var = f.getVariable();
         String postfix = isTrue ? "_true" : "_false";
         if(f.isconstant()) {
             postfix = "";
         }
-        GraphNode me = new GraphNode(String.valueOf(var) + postfix);
+        UDrawConnector.GraphNode me = new UDrawConnector.GraphNode(String.valueOf(var) + postfix);
         if(f.isconstant() ){
             me.attr().displayname = f.istrue() ? "TRUE" :  "FALSE";
             return me;
         }
         
-        GraphNode _then = toUDraw(f.getThen(var), true);
-        GraphNode _else = toUDraw(f.getElse(var), false);
+        UDrawConnector.GraphNode _then = toUDraw(f.getThen(var), true);
+        UDrawConnector.GraphNode _else = toUDraw(f.getElse(var), false);
         
         _then.attr().edgename = "true";
         _else.attr().edgename = "false";

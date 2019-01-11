@@ -1,4 +1,4 @@
-package assignment3;
+
 
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
@@ -27,9 +27,8 @@ import javax.swing.JTextField;
 import BoolExprParser.BoolExprParser;
 import BoolExprParser.BoolExprScanner;
 import BoolExprParser.Node;
-import assignment3.UDrawConnector.GraphNode;
 
-public class Main {
+public class UDrawControlStarter {
 
     public static final String MY_LINUX_PATH = "/home/tyrone/dev/hs/algo-exam/uDrawGraph-3.1/bin/uDrawGraph";
     public static final String MY_WINDOWS_PATH = "c:/dev/tools/uDraw(Graph)/bin/uDrawGraph";
@@ -217,12 +216,12 @@ public class Main {
 
         @Override
         public String getGraphAsString(UDrawConnector connector) {
-            UDrawConnector.GraphNode root = new GraphNode("root");
+            UDrawConnector.GraphNode root = new UDrawConnector.GraphNode("root");
             
-            GraphNode left = new GraphNode("left");
-            GraphNode right = new GraphNode("right");
+            UDrawConnector.GraphNode left = new UDrawConnector.GraphNode("left");
+            UDrawConnector.GraphNode right = new UDrawConnector.GraphNode("right");
             
-            GraphNode grandChild = new GraphNode("grandchild");
+            UDrawConnector.GraphNode grandChild = new UDrawConnector.GraphNode("grandchild");
             
             root.addChild(left.addChild(grandChild), right);
             
@@ -309,10 +308,10 @@ public class Main {
 
         @Override
         public String getGraphAsString(UDrawConnector connector) {
-            GraphNode root = new GraphNode("root");
+            UDrawConnector.GraphNode root = new UDrawConnector.GraphNode("root");
             
-            GraphNode x1 = new GraphNode("x");
-            GraphNode y1 = new GraphNode("x");
+            UDrawConnector.GraphNode x1 = new UDrawConnector.GraphNode("x");
+            UDrawConnector.GraphNode y1 = new UDrawConnector.GraphNode("x");
             
             root.addChild(x1);
             x1.addChild(y1);
@@ -414,7 +413,7 @@ public class Main {
 
         @Override
         public String getGraphAsString(UDrawConnector connector) {
-            GraphNode udraw = m_Tree.toUDraw();
+            UDrawConnector.GraphNode udraw = m_Tree.toUDraw();
             if(udraw == null) {
                 return "graph(new([]))";
             }
@@ -628,7 +627,7 @@ public class Main {
 
         @Override
         public String getGraphAsString(UDrawConnector connector) {
-            GraphNode udraw =  asTop234 ? m_Tree.toUDrawTop234() : m_Tree.toUDraw();
+            UDrawConnector.GraphNode udraw =  asTop234 ? m_Tree.toUDrawTop234() : m_Tree.toUDraw();
             if(udraw == null) {
                 return "nothing";
             }

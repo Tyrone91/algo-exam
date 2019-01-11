@@ -1,13 +1,10 @@
-package assignment3;
+
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-
-import assignment3.UDrawConnector.GraphNode;
-import assignment3.UDrawConnector.GraphNodeEmptyTree;
 
 class Comparison<T extends Comparable<T>> {
     
@@ -452,21 +449,21 @@ public class RedBlackTree<K extends Comparable<K>, T>{
         h.runTests();
     }
     
-    public assignment3.UDrawConnector.GraphNode toUDraw() {
+    public UDrawConnector.GraphNode toUDraw() {
         if(m_Root == null) {
-            return new GraphNodeEmptyTree();
+            return new UDrawConnector.GraphNodeEmptyTree();
         }
         return toUDraw(m_Root);
     }
     
-    public GraphNode toUDrawTop234() {
+    public UDrawConnector.GraphNode toUDrawTop234() {
         if(m_Root == null) {
-            return new GraphNodeEmptyTree();
+            return new UDrawConnector.GraphNodeEmptyTree();
         }
         return toUDrawTop234(m_Root);
     }
     
-    public GraphNode toUDrawTop234(Node n) {
+    public UDrawConnector.GraphNode toUDrawTop234(Node n) {
         List<String> id = new ArrayList<>();
         List<Node> nextNodes = new ArrayList<>();
         id.add(n.key().toString());
@@ -487,7 +484,7 @@ public class RedBlackTree<K extends Comparable<K>, T>{
             nextNodes.add(n.right());
         }
         
-        GraphNode me = new GraphNode(id.stream().collect(Collectors.joining("_")));
+        UDrawConnector.GraphNode me = new UDrawConnector.GraphNode(id.stream().collect(Collectors.joining("_")));
         me.attr().displayname = id.stream()
                 .sorted()
                 .collect(Collectors.joining(" "));
@@ -499,9 +496,9 @@ public class RedBlackTree<K extends Comparable<K>, T>{
         return me;
     }
     
-    private assignment3.UDrawConnector.GraphNode toUDraw(Node n) {
+    private UDrawConnector.GraphNode toUDraw(Node n) {
         
-        final assignment3.UDrawConnector.GraphNode me = new assignment3.UDrawConnector.GraphNode(n.key().toString());
+        final UDrawConnector.GraphNode me = new UDrawConnector.GraphNode(n.key().toString());
         me.attr().displayname = n.key().toString() + " = " + n.data().toString();
         me.attr().edgecolor = n.isRed() ? "#e20000" : "#000000";
         if(n.hasLeft()) {
